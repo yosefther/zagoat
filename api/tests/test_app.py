@@ -2,6 +2,7 @@ from fastapi.testclient import TestClient
 
 from app.config import Environment, Settings
 from app.main import create_app
+from tests.conftest import make_settings
 
 
 def test_cors_allows_the_web_origin(client: TestClient) -> None:
@@ -25,12 +26,10 @@ def test_docs_are_served_outside_production(client: TestClient) -> None:
 
 
 def test_docs_are_hidden_in_production(settings: Settings) -> None:
-    production = Settings(
-        _env_file=None,
+    production = make_settings(
         environment=Environment.PRODUCTION,
-        database_url=settings.database_url,
-        redis_url=settings.redis_url,
         web_origin="https://zagoat.io",
+        cookie_secure=True,
     )
     client = TestClient(create_app(production))
 

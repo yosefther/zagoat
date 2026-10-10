@@ -1,6 +1,7 @@
 from alembic import context
 from sqlalchemy import Connection
 
+from app import models  # noqa: F401  (registers tables on Base.metadata)
 from app.config import get_settings
 from app.db import Base, get_engine
 
