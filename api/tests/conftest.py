@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.config import Environment, Settings
 from app.db import get_db
 from app.main import create_app
+from app.models import User
 
 # Tests use their own database and Redis db number so they never touch dev data.
 TEST_DATABASE_URL = os.environ.get(
@@ -93,3 +94,16 @@ def csrf_headers(client: TestClient) -> dict[str, str]:
     """Fetch a CSRF token the way the web app does and return the header to send."""
     token = client.get("/csrf").json()["csrf_token"]
     return {"X-CSRF-Token": token}
+
+
+def sign_in(client: TestClient, db: Session, email: str = "ada@example.com") -> User:
+    """Create a user with a live session and put the session cookie on the client."""
+    from app.security.sessions import create_session
+
+    user = User(email=email, name="Ada")
+    db.add(user)
+    db.flush()
+    token, _ = create_session(db, make_settings(), user)
+    db.commit()
+    client.cookies.set("zagoat_session", token)
+    return user

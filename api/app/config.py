@@ -20,7 +20,13 @@ class Environment(StrEnum):
 
 
 # Settings that have a local-dev default but must be set explicitly in production.
-REQUIRED_IN_PRODUCTION = ("database_url", "redis_url", "web_origin", "secret_key")
+REQUIRED_IN_PRODUCTION = (
+    "database_url",
+    "redis_url",
+    "web_origin",
+    "api_origin",
+    "secret_key",
+)
 
 
 class Settings(BaseSettings):
@@ -53,6 +59,24 @@ class Settings(BaseSettings):
     # How long /healthz waits on each dependency before reporting it down.
     healthcheck_timeout_seconds: float = 2.0
 
+    # Public URL of this API; OAuth providers redirect back to it.
+    api_origin: str = "http://localhost:8000"
+
+    # Sessions (section 3: server-side sessions in HTTP-only cookies).
+    session_cookie_name: str = "zagoat_session"
+    session_lifetime_days: int = 30
+
+    # OAuth sign-in. A provider is offered only when both its id and secret are set.
+    github_client_id: str | None = None
+    github_client_secret: str | None = None
+    google_client_id: str | None = None
+    google_client_secret: str | None = None
+    oauth_state_ttl_seconds: int = 600
+    oauth_http_timeout_seconds: float = 10.0
+
+    # Local-only sign-in without OAuth, for development. Refused in production.
+    dev_login_enabled: bool = False
+
     # Sign-in and waitlist attempts per IP (section 9, proposed).
     ip_attempts_per_hour: int = 5
 
@@ -69,6 +93,8 @@ class Settings(BaseSettings):
                 raise ValueError(f"Production requires these settings to be set: {names}")
             if not self.cookie_secure:
                 raise ValueError("Production requires COOKIE_SECURE=true")
+            if self.dev_login_enabled:
+                raise ValueError("DEV_LOGIN_ENABLED must be false in production")
         return self
 
     @property

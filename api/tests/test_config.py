@@ -1,7 +1,23 @@
+from typing import Any
+
 import pytest
 from pydantic import ValidationError
 
 from app.config import Environment, Settings
+
+PRODUCTION: dict[str, Any] = {
+    "environment": Environment.PRODUCTION,
+    "database_url": "postgresql+psycopg://u:p@db:5432/zagoat",
+    "redis_url": "redis://cache:6379/0",
+    "web_origin": "https://zagoat.io",
+    "api_origin": "https://api.zagoat.io",
+    "secret_key": "a-long-random-secret",
+    "cookie_secure": True,
+}
+
+
+def production(**overrides: Any) -> Settings:
+    return Settings(_env_file=None, **{**PRODUCTION, **overrides})
 
 
 def test_development_works_with_defaults() -> None:
@@ -12,34 +28,24 @@ def test_development_works_with_defaults() -> None:
 
 
 def test_production_refuses_to_start_on_defaults() -> None:
-    with pytest.raises(ValidationError, match="DATABASE_URL, REDIS_URL, WEB_ORIGIN, SECRET_KEY"):
-        Settings(_env_file=None, environment=Environment.PRODUCTION)
+    with pytest.raises(
+        ValidationError, match="DATABASE_URL, REDIS_URL, WEB_ORIGIN, API_ORIGIN, SECRET_KEY"
+    ):
+        Settings(_env_file=None, environment=Environment.PRODUCTION, cookie_secure=True)
 
 
 def test_production_accepts_explicit_values() -> None:
-    settings = Settings(
-        _env_file=None,
-        environment=Environment.PRODUCTION,
-        database_url="postgresql+psycopg://u:p@db:5432/zagoat",
-        redis_url="redis://cache:6379/0",
-        web_origin="https://zagoat.io",
-        secret_key="a-long-random-secret",
-        cookie_secure=True,
-    )
-
-    assert settings.is_production
+    assert production().is_production
 
 
 def test_production_requires_secure_cookies() -> None:
     with pytest.raises(ValidationError, match="COOKIE_SECURE"):
-        Settings(
-            _env_file=None,
-            environment=Environment.PRODUCTION,
-            database_url="postgresql+psycopg://u:p@db:5432/zagoat",
-            redis_url="redis://cache:6379/0",
-            web_origin="https://zagoat.io",
-            secret_key="a-long-random-secret",
-        )
+        production(cookie_secure=False)
+
+
+def test_production_refuses_dev_login() -> None:
+    with pytest.raises(ValidationError, match="DEV_LOGIN_ENABLED"):
+        production(dev_login_enabled=True)
 
 
 def test_settings_read_from_environment(monkeypatch: pytest.MonkeyPatch) -> None:

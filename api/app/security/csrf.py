@@ -15,6 +15,7 @@ from fastapi import Depends, Request, Response, status
 
 from app.config import Settings, get_settings
 from app.errors import AppError
+from app.security.sessions import OptionalAuth
 
 ANONYMOUS = "anonymous"
 
@@ -55,7 +56,11 @@ def csrf_binding(request: Request) -> str:
     return str(session_id) if session_id else ANONYMOUS
 
 
-def require_csrf(request: Request, settings: Annotated[Settings, Depends(get_settings)]) -> None:
+def require_csrf(
+    request: Request,
+    settings: Annotated[Settings, Depends(get_settings)],
+    _auth: OptionalAuth,  # Resolves the session first, so the token's binding is known.
+) -> None:
     cookie = request.cookies.get(settings.csrf_cookie_name)
     header = request.headers.get(settings.csrf_header_name)
     if (

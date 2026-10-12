@@ -29,6 +29,7 @@ def test_docs_are_hidden_in_production(settings: Settings) -> None:
     production = make_settings(
         environment=Environment.PRODUCTION,
         web_origin="https://zagoat.io",
+        api_origin="https://api.zagoat.io",
         cookie_secure=True,
     )
     client = TestClient(create_app(production))
