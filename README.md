@@ -6,11 +6,13 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 
 ## Status
 
-Done: Milestone 1 (foundations) and Milestone 2 (landing page and waitlist).
+Done: Milestones 1 (foundations), 2 (landing page and waitlist) and 3 (accounts).
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
-design decisions are in [docs/design.md](docs/design.md).
+design decisions are in [docs/design.md](docs/design.md). Sign-in works with GitHub, Google
+or (locally only) a dev user, and the account page covers profile, the code opt-in and
+self-service deletion.
 
 ## Repo layout
 
@@ -100,12 +102,28 @@ npm run build
 Each service keeps every tunable value in one config module:
 
 - API: `api/app/config.py`, read from environment variables or `api/.env`. With
-  `ENVIRONMENT=production`, the API refuses to start unless `DATABASE_URL`, `REDIS_URL` and
-  `WEB_ORIGIN` are set explicitly.
+  `ENVIRONMENT=production`, the API refuses to start unless `DATABASE_URL`, `REDIS_URL`,
+  `WEB_ORIGIN`, `API_ORIGIN` and `SECRET_KEY` are set explicitly, `COOKIE_SECURE=true`, and
+  `DEV_LOGIN_ENABLED` is off.
 - Web: `web/src/config.ts`. `NEXT_PUBLIC_*` values are baked into the browser bundle at build
   time, so they must never hold secrets.
 
 The `.env.example` files list every variable. Real `.env` files are gitignored.
+
+## Sign-in
+
+- GitHub and Google use the OAuth authorization-code flow with PKCE, a one-time state
+  stored in Redis and a state cookie that ties the flow to the browser. A provider appears
+  on the sign-in page only when its client id and secret are set in `api/.env`.
+  - GitHub: create an OAuth app with callback `<API_ORIGIN>/auth/github/callback`.
+  - Google: create an OAuth client (web application) with redirect URI
+    `<API_ORIGIN>/auth/google/callback`.
+- A verified email links a second provider to the same user.
+- For local development without OAuth apps, `DEV_LOGIN_ENABLED=true` (the default in
+  `api/.env.example`) adds "Continue as dev user", which signs in as `dev@example.com`.
+- Sessions are random tokens in an HTTP-only, SameSite=Lax cookie; only their SHA-256 is
+  stored. `DELETE /me` removes the user and, through cascading foreign keys, everything
+  tied to them.
 
 ## Security basics
 
