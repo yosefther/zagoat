@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { UserMenu } from "@/components/UserMenu";
 import { Wordmark } from "@/components/Wordmark";
 
 const NAV_LINKS = [{ href: "/pricing", label: "Pricing" }];
@@ -9,7 +10,7 @@ export function SiteHeader() {
     <header className="border-b border-border bg-surface">
       <div className="container-page flex h-16 items-center justify-between gap-4">
         <Wordmark />
-        <nav aria-label="Main">
+        <nav aria-label="Main" className="flex items-center gap-2 sm:gap-4">
           <ul className="flex items-center gap-1 text-sm font-medium sm:gap-4">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
@@ -22,6 +23,7 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
+          <UserMenu />
         </nav>
       </div>
     </header>
