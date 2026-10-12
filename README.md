@@ -6,7 +6,11 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 
 ## Status
 
-Milestone 1 (foundations) is done. The API has a health check, and the web app shows a placeholder page.
+Done: Milestone 1 (foundations) and Milestone 2 (landing page and waitlist).
+
+The web app has the landing page with a waitlist form, privacy and terms placeholders
+(marked as drafts to review before launch), a static pricing page and a 404 page. The
+design decisions are in [docs/design.md](docs/design.md).
 
 ## Repo layout
 
@@ -102,6 +106,27 @@ Each service keeps every tunable value in one config module:
   time, so they must never hold secrets.
 
 The `.env.example` files list every variable. Real `.env` files are gitignored.
+
+## Security basics
+
+- Every state-changing route needs a CSRF token: the web app calls `GET /csrf`, which sets a
+  readable `zagoat_csrf` cookie, and echoes it in the `X-CSRF-Token` header. Tokens are
+  signed and bound to the session, so planted or stale tokens are rejected; the web client
+  fetches a fresh one and retries once.
+- CORS allows only `WEB_ORIGIN`, with credentials.
+- Errors always use one shape: `{"error": {"code", "message", ...}}`. Validation errors add
+  `fields`, rate limits add `retry_after_seconds` and a `Retry-After` header.
+- Per-IP rate limits use Redis fixed windows (`api/app/ratelimit.py`). In production, run
+  uvicorn with `--proxy-headers` behind the reverse proxy so the client IP is real.
+
+## Monitoring and analytics
+
+Both stay off until keys are set; no accounts are needed for local development.
+
+- Sentry: `SENTRY_DSN` (API) and `NEXT_PUBLIC_SENTRY_DSN` (web). No user info, cookies,
+  headers or request bodies are sent, so user code never reaches Sentry.
+- PostHog: `NEXT_PUBLIC_POSTHOG_KEY`. Runs with in-memory persistence (no cookies or
+  localStorage), page views only, no autocapture or session recording.
 
 ## Database migrations
 
