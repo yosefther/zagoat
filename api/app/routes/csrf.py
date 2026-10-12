@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.config import Settings, get_settings
 from app.security.csrf import csrf_binding, issue_token, set_csrf_cookie
+from app.security.sessions import OptionalAuth
 
 router = APIRouter()
 
@@ -15,7 +16,10 @@ class CsrfResponse(BaseModel):
 
 @router.get("/csrf", response_model=CsrfResponse)
 def get_csrf_token(
-    request: Request, response: Response, settings: Annotated[Settings, Depends(get_settings)]
+    request: Request,
+    response: Response,
+    settings: Annotated[Settings, Depends(get_settings)],
+    _auth: OptionalAuth,
 ) -> CsrfResponse:
     """Issue a fresh CSRF token as a cookie and in the body."""
     token = issue_token(settings, csrf_binding(request))

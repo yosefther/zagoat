@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import Settings, get_settings
 from app.errors import install_error_handlers
 from app.monitoring import init_sentry
-from app.routes import csrf, health, waitlist
+from app.routes import auth, csrf, health, me, waitlist
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -22,13 +22,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         CORSMiddleware,
         allow_origins=[settings.web_origin],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Content-Type", settings.csrf_header_name],
     )
     install_error_handlers(app)
     app.include_router(health.router)
     app.include_router(csrf.router)
     app.include_router(waitlist.router)
+    app.include_router(auth.router)
+    app.include_router(me.router)
     return app
 
 

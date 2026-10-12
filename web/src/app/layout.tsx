@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { plexMono, plexSans, spaceGrotesk } from "@/app/fonts";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SessionProvider } from "@/lib/session";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
@@ -33,11 +34,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to main content
         </a>
-        <SiteHeader />
-        <div id="main" className="flex flex-1 flex-col">
-          {children}
-        </div>
-        <SiteFooter />
+        <SessionProvider>
+          <SiteHeader />
+          <div id="main" className="flex flex-1 flex-col">
+            {children}
+          </div>
+          <SiteFooter />
+        </SessionProvider>
       </body>
     </html>
   );
