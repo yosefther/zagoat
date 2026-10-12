@@ -2,11 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import Settings, get_settings
-from app.routes import health
+from app.errors import install_error_handlers
+from app.monitoring import init_sentry
+from app.routes import csrf, health, waitlist
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
+    init_sentry(settings)
     app = FastAPI(
         title="zagoat API",
         # Interactive docs are for local development only.
@@ -20,9 +23,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         allow_origins=[settings.web_origin],
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE"],
-        allow_headers=["Content-Type", "X-CSRF-Token"],
+        allow_headers=["Content-Type", settings.csrf_header_name],
     )
+    install_error_handlers(app)
     app.include_router(health.router)
+    app.include_router(csrf.router)
+    app.include_router(waitlist.router)
     return app
 
 

@@ -1,20 +1,13 @@
-from pathlib import Path
-
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import create_engine
+from sqlalchemy import Engine
 
-from app.config import Settings
-
-ALEMBIC_INI = Path(__file__).resolve().parents[1] / "alembic.ini"
+from tests.conftest import ALEMBIC_INI
 
 
-def test_migrations_upgrade_and_downgrade_cleanly(settings: Settings) -> None:
-    engine = create_engine(settings.database_url)
+def test_migrations_downgrade_and_upgrade_cleanly(engine: Engine) -> None:
     with engine.begin() as connection:
         config = Config(ALEMBIC_INI)
         config.attributes["connection"] = connection
-        command.upgrade(config, "head")
         command.downgrade(config, "base")
         command.upgrade(config, "head")
-    engine.dispose()
