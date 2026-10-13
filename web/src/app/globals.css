@@ -164,3 +164,46 @@
     @apply list-disc pl-6;
   }
 }
+
+/* Rendered task statements, hints and walkthroughs. */
+@utility markdown {
+  @apply flex flex-col gap-4 leading-relaxed;
+
+  & h1 {
+    @apply text-2xl font-bold;
+  }
+  & h2 {
+    @apply mt-4 text-xl font-bold;
+  }
+  & h3 {
+    @apply mt-2 text-lg font-bold;
+  }
+  & ul {
+    @apply list-disc pl-6;
+  }
+  & ol {
+    @apply list-decimal pl-6;
+  }
+  & li + li {
+    @apply mt-1;
+  }
+  & code {
+    @apply rounded bg-code px-1 py-0.5 font-mono text-[0.9em];
+  }
+  & pre {
+    @apply overflow-x-auto rounded-lg border border-border bg-code p-3 text-sm;
+  }
+  & pre code {
+    @apply bg-transparent p-0;
+  }
+  & table {
+    @apply w-full border-collapse text-sm;
+  }
+  & th,
+  & td {
+    @apply border border-border px-2 py-1.5 text-left align-top;
+  }
+  & th {
+    @apply bg-code font-semibold;
+  }
+}

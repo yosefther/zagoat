@@ -1,9 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { UserMenu } from "@/components/UserMenu";
 import { Wordmark } from "@/components/Wordmark";
 
-const NAV_LINKS = [{ href: "/pricing", label: "Pricing" }];
+const NAV_LINKS = [
+  { href: "/problems", label: "Problems" },
+  { href: "/pricing", label: "Pricing" },
+];
 
 export function SiteHeader() {
   return (
@@ -23,7 +27,10 @@ export function SiteHeader() {
               </li>
             ))}
           </ul>
-          <UserMenu />
+          {/* The menu reads the current path, which dynamic routes only know at request time. */}
+          <Suspense fallback={<span className="inline-block h-9 w-20" aria-hidden="true" />}>
+            <UserMenu />
+          </Suspense>
         </nav>
       </div>
     </header>
