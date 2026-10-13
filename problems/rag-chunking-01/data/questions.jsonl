@@ -1,0 +1,28 @@
+{"id": "q01", "question": "How many days do I have to send gear back?", "section": "returns.md#return-window", "evidence": "within 45 days of delivery"}
+{"id": "q02", "question": "Does the return period start from the order date or the delivery date?", "section": "returns.md#return-window", "evidence": "not the order date"}
+{"id": "q03", "question": "Will I get my full money back if the tags were removed?", "section": "returns.md#condition-of-returned-items", "evidence": "reduced rate"}
+{"id": "q04", "question": "Does my tent need all its poles and pegs to be returned?", "section": "returns.md#condition-of-returned-items", "evidence": "every pole, peg and guy line"}
+{"id": "q05", "question": "How long until the refund reaches my card after the warehouse scans the parcel?", "section": "returns.md#refund-timing", "evidence": "within 5 working days"}
+{"id": "q06", "question": "When does store credit from a refund show up?", "section": "returns.md#refund-timing", "evidence": "immediately after the"}
+{"id": "q07", "question": "Can I swap my boots for a different size?", "section": "returns.md#exchanges", "evidence": "swap a size or colour"}
+{"id": "q08", "question": "How long do you reserve the replacement item during an exchange?", "section": "returns.md#exchanges", "evidence": "reserve the replacement"}
+{"id": "q09", "question": "Can I return a climbing harness after cutting the hang tag?", "section": "returns.md#items-that-cannot-be-returned", "evidence": "hang tag has been cut"}
+{"id": "q10", "question": "Are gift cards refundable for cash?", "section": "returns.md#items-that-cannot-be-returned", "evidence": "Gift"}
+{"id": "q11", "question": "If I order at 4 pm, when does my order leave the warehouse?", "section": "shipping.md#processing-time", "evidence": "next working day"}
+{"id": "q12", "question": "How much does express delivery cost?", "section": "shipping.md#shipping-rates", "evidence": "Express delivery costs 12.50"}
+{"id": "q13", "question": "Is there a surcharge for shipping a kayak?", "section": "shipping.md#shipping-rates", "evidence": "oversize surcharge"}
+{"id": "q14", "question": "Who pays customs duties and import taxes on orders to Canada?", "section": "shipping.md#international-orders", "evidence": "paid by the recipient"}
+{"id": "q15", "question": "My parcel arrived crushed and wet, what should I do?", "section": "shipping.md#lost-or-damaged-parcels", "evidence": "photograph the box"}
+{"id": "q16", "question": "How long does the warranty last on Fernhollow products?", "section": "warranty.md#what-the-warranty-covers", "evidence": "3-year warranty"}
+{"id": "q17", "question": "Is fading from sunlight covered by the warranty?", "section": "warranty.md#what-the-warranty-excludes", "evidence": "Fading from sunlight"}
+{"id": "q18", "question": "What photos should I attach to a warranty claim?", "section": "warranty.md#making-a-warranty-claim", "evidence": "Attach two"}
+{"id": "q19", "question": "What happens if my jacket cannot be repaired?", "section": "warranty.md#repairs-and-replacements", "evidence": "If a repair is not possible"}
+{"id": "q20", "question": "When does a weekend rental start and end?", "section": "rentals.md#rental-periods", "evidence": "Friday noon to"}
+{"id": "q21", "question": "How much is the deposit for renting a tent?", "section": "rentals.md#deposits", "evidence": "150 for tents and packs"}
+{"id": "q22", "question": "Can I pay the rental deposit with a debit card?", "section": "rentals.md#deposits", "evidence": "cannot accept debit cards"}
+{"id": "q23", "question": "What is the charge if I bring rental gear back late?", "section": "rentals.md#late-returns", "evidence": "one extra day"}
+{"id": "q24", "question": "I burned a hole in a rented tent with my stove, what will it cost?", "section": "rentals.md#damage-during-a-rental", "evidence": "capped at the deposit amount"}
+{"id": "q25", "question": "How many points do I earn on rentals?", "section": "membership.md#earning-points", "evidence": "2 points for every 1 spent on"}
+{"id": "q26", "question": "How do I turn Trail Club points into a voucher?", "section": "membership.md#redeeming-points", "evidence": "Every 500 points"}
+{"id": "q27", "question": "What happens to my points if I leave Trail Club?", "section": "membership.md#leaving-the-club", "evidence": "Unused points expire"}
+{"id": "q28", "question": "Is joining Trail Club free?", "section": "membership.md#trail-club-points", "evidence": "free membership"}

@@ -1,0 +1,21 @@
+id: evals-ticket-classifier-01
+title: Write an eval for a ticket classifier
+summary: >-
+  An LLM labels support tickets, and nobody knows how well. Parse its messy replies and
+  build an eval that reports per-label precision, recall and F1.
+category: evals
+difficulty: easy
+est_minutes: 30
+access: paid
+image: zagoat-py311-ml
+files:
+  statement: statement.md
+  starter: starter/
+  data: data/
+  hints: hints.md
+  walkthrough: walkthrough.md
+  reference: reference/
+grader:
+  sample_tests: tests/sample/
+  hidden_tests: tests/hidden/
+mock_llm: fixtures/llm.jsonl

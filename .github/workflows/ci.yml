@@ -49,6 +49,28 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy .
       - run: uv run pytest
+      - name: Validate problem folders
+        run: uv run python -m app.problems validate ../problems
+
+  runner:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: runner
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          working-directory: runner
+          enable-cache: true
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy .
+      - run: uv run pytest
+      # Every task's reference solution must pass its own hidden tests within the Submit limit.
+      - name: Validate tasks
+        run: uv run python -m zagoat_runner.validate ../problems
 
   web:
     runs-on: ubuntu-24.04

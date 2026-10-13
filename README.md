@@ -6,13 +6,15 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 
 ## Status
 
-Done: Milestones 1 (foundations), 2 (landing page and waitlist) and 3 (accounts).
+Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts) and 4
+(problems).
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
 design decisions are in [docs/design.md](docs/design.md). Sign-in works with GitHub, Google
 or (locally only) a dev user, and the account page covers profile, the code opt-in and
-self-service deletion.
+self-service deletion. Problems sync from `problems/` into Postgres and show up at
+`/problems`, with two original development tasks (one RAG, one evals).
 
 ## Repo layout
 
@@ -20,8 +22,8 @@ self-service deletion.
 | --- | --- |
 | `api/` | FastAPI app (Python 3.12, SQLAlchemy, Alembic, Pydantic) |
 | `web/` | Next.js app (App Router, TypeScript, Tailwind) |
-| `runner/` | Worker, sandbox images and mock LLM (Milestone 6) |
-| `problems/` | One folder per practice task (Milestone 4) |
+| `runner/` | Grading harness, mock LLM and task validation; worker and sandbox come in Milestone 6 ([runner/README.md](runner/README.md)) |
+| `problems/` | One folder per practice task ([problems/README.md](problems/README.md) explains how to write one) |
 | `infra/` | docker-compose for local development; server scripts later |
 
 ## Prerequisites
@@ -51,6 +53,7 @@ All commands start from the repo root.
    cp .env.example .env
    uv sync
    uv run alembic upgrade head
+   uv run python -m app.problems sync   # load problems/ into the database
    uv run uvicorn app.main:app --reload
    ```
 
@@ -82,10 +85,22 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy .
 uv run pytest
+uv run python -m app.problems validate ../problems
 ```
 
 Tests use the `zagoat_test` database and Redis db 15. To use other instances, set
 `TEST_DATABASE_URL` or `TEST_REDIS_URL`.
+
+Runner (grading harness, mock LLM, task validation):
+
+```sh
+cd runner
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy .
+uv run pytest
+uv run python -m zagoat_runner.validate ../problems
+```
 
 Web:
 

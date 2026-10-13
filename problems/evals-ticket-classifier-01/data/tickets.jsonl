@@ -1,0 +1,38 @@
+{"id": "t01", "text": "I was charged twice for my annual plan this month. Please refund one of the payments.", "label": "billing"}
+{"id": "t02", "text": "My receipt shows the wrong VAT number for my company.", "label": "billing"}
+{"id": "t03", "text": "Can I switch from monthly to yearly billing and keep my discount?", "label": "billing"}
+{"id": "t04", "text": "The student discount code says it has expired but my school year just started.", "label": "billing"}
+{"id": "t05", "text": "Why did my card get declined when I tried to upgrade?", "label": "billing"}
+{"id": "t06", "text": "You charged me after I cancelled my trial on day 5.", "label": "billing"}
+{"id": "t07", "text": "I need an invoice for last quarter for my accountant.", "label": "billing"}
+{"id": "t08", "text": "The price on the pricing page doesn't match what I paid.", "label": "billing"}
+{"id": "t09", "text": "The app crashes every time I paste an image into a note.", "label": "bug"}
+{"id": "t10", "text": "Search returns notes I deleted last week.", "label": "bug"}
+{"id": "t11", "text": "Dark mode turns my checklist text invisible on Android.", "label": "bug"}
+{"id": "t12", "text": "Sync has been stuck at 99 percent since yesterday.", "label": "bug"}
+{"id": "t13", "text": "When I export to PDF the headings come out in the wrong order.", "label": "bug"}
+{"id": "t14", "text": "Tags disappear from notes after I edit them on my tablet.", "label": "bug"}
+{"id": "t15", "text": "The keyboard shortcut for bold doesn't work on the Mac app.", "label": "bug"}
+{"id": "t16", "text": "Notifications show up hours after the reminder time.", "label": "bug"}
+{"id": "t17", "text": "I can't log in, it says my password is wrong but I just reset it.", "label": "account"}
+{"id": "t18", "text": "How do I change the email address on my account?", "label": "account"}
+{"id": "t19", "text": "Please delete my account and all my data.", "label": "account"}
+{"id": "t20", "text": "I signed up with Google and now want to use a password instead.", "label": "account"}
+{"id": "t21", "text": "My two-factor codes stopped working after I got a new phone.", "label": "account"}
+{"id": "t22", "text": "Someone else logged into my account from another country.", "label": "account"}
+{"id": "t23", "text": "Can I merge my two accounts into one?", "label": "account"}
+{"id": "t24", "text": "I'm locked out after too many login attempts.", "label": "account"}
+{"id": "t25", "text": "Please add a way to share a notebook with read-only access.", "label": "feature_request"}
+{"id": "t26", "text": "It would be great to have a calendar view for notes with dates.", "label": "feature_request"}
+{"id": "t27", "text": "Could you support Markdown tables?", "label": "feature_request"}
+{"id": "t28", "text": "I'd love an option to lock individual notes with a PIN.", "label": "feature_request"}
+{"id": "t29", "text": "Please let me pick a custom font for the editor.", "label": "feature_request"}
+{"id": "t30", "text": "Can you add an integration with my email client?", "label": "feature_request"}
+{"id": "t31", "text": "Will there be a Linux desktop app?", "label": "feature_request"}
+{"id": "t32", "text": "Your support team was really helpful last week, thank you!", "label": "other"}
+{"id": "t33", "text": "Do you offer discounts for non-profit organisations?", "label": "other"}
+{"id": "t34", "text": "Is Tidepool hiring designers?", "label": "other"}
+{"id": "t35", "text": "Where can I find your privacy policy?", "label": "other"}
+{"id": "t36", "text": "What's the difference between Tidepool and a regular notes app?", "label": "other"}
+{"id": "t37", "text": "I think your logo looks like a jellyfish.", "label": "other"}
+{"id": "t38", "text": "Can I use Tidepool for my school project?", "label": "other"}
