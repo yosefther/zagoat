@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import Settings, get_settings
 from app.errors import install_error_handlers
 from app.monitoring import init_sentry
-from app.routes import auth, csrf, health, me, waitlist
+from app.routes import auth, csrf, health, me, problems, waitlist
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -31,6 +31,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(waitlist.router)
     app.include_router(auth.router)
     app.include_router(me.router)
+    app.include_router(problems.router)
     return app
 
 
