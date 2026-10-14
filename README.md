@@ -6,15 +6,16 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 
 ## Status
 
-Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts) and 4
-(problems).
+Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts), 4
+(problems) and 5 (editor and drafts).
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
 design decisions are in [docs/design.md](docs/design.md). Sign-in works with GitHub, Google
 or (locally only) a dev user, and the account page covers profile, the code opt-in and
 self-service deletion. Problems sync from `problems/` into Postgres and show up at
-`/problems`, with two original development tasks (one RAG, one evals).
+`/problems`, with two original development tasks (one RAG, one evals). Signed-in users with
+access get a Monaco editor with a tab per file and debounced autosave of their draft.
 
 ## Repo layout
 
@@ -170,6 +171,15 @@ uv run alembic upgrade head
 ```
 
 New migration files are lint-fixed and formatted with ruff automatically.
+
+## Editor
+
+- Monaco loads from jsDelivr at a pinned version (`monacoBaseUrl` in `web/src/config.ts`)
+  instead of being bundled; bundling Monaco's web workers into Next.js is fiddly and the
+  CDN keeps the app bundle small. A Content Security Policy must allow that origin.
+- Drafts save 1 s after typing stops (`autosaveDelayMs`), never overlap, and retry every
+  5 s after a failure. The API only accepts the problem's starter file names and caps a
+  draft at 1 MB (`MAX_CODE_BYTES`).
 
 ## Dependencies
 
