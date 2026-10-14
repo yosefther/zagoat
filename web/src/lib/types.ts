@@ -36,4 +36,6 @@ export type ProblemDetail = ProblemSummary & {
   has_walkthrough: boolean;
   lock: "sign_in" | "paid" | null;
   starter_files: Record<string, string> | null;
+  draft_files: Record<string, string> | null;
+  draft_updated_at: string | null;
 };

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { SolveArea } from "@/app/problems/[id]/SolveArea";
 import { ApiError, request } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { ProblemDetail } from "@/lib/types";
@@ -53,20 +54,7 @@ export function ProblemWorkspace({ problemId }: { problemId: string }) {
       </Notice>
     );
   }
-  return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto p-6">
-      {Object.entries(problem.starter_files ?? {}).map(([name, code]) => (
-        <figure key={name} className="card overflow-hidden">
-          <figcaption className="border-b border-border px-3 py-1.5 font-mono text-xs text-muted">
-            {name}
-          </figcaption>
-          <pre className="overflow-x-auto p-3 font-mono text-xs">
-            <code>{code}</code>
-          </pre>
-        </figure>
-      ))}
-    </div>
-  );
+  return <SolveArea problem={problem} />;
 }
 
 function Notice({ title, children }: { title: string; children: React.ReactNode }) {

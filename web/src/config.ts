@@ -18,6 +18,12 @@ export type WebConfig = {
   /** Name of the readable cookie the API uses for CSRF tokens. */
   csrfCookieName: string;
   csrfHeaderName: string;
+  /** Wait this long after the last keystroke before saving a draft. */
+  autosaveDelayMs: number;
+  /** Wait this long before retrying a draft save that failed. */
+  autosaveRetryMs: number;
+  /** Monaco is loaded from this pinned CDN path (matches @monaco-editor/react's default). */
+  monacoBaseUrl: string;
 };
 
 type RawConfig = {
@@ -57,6 +63,9 @@ export function parseConfig(raw: RawConfig): WebConfig {
     environment: optional(raw.environment) ?? "development",
     csrfCookieName: "zagoat_csrf",
     csrfHeaderName: "X-CSRF-Token",
+    autosaveDelayMs: 1000,
+    autosaveRetryMs: 5000,
+    monacoBaseUrl: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
   };
 }
 
