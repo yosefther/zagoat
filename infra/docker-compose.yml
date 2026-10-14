@@ -33,6 +33,29 @@ services:
       timeout: 3s
       retries: 30
 
+  # Mock LLM for sandboxes. It sits on the internal "zagoat-sandbox" network, which has no
+  # route to the internet, so sandbox containers on that network can reach only this service.
+  mockllm:
+    build: ../runner
+    volumes:
+      - ../problems:/srv/problems:ro
+    networks:
+      sandbox:
+        aliases: [mockllm]
+      default: {}
+    ports:
+      - "127.0.0.1:${MOCKLLM_PORT:-8090}:8090"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/healthz')"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+networks:
+  sandbox:
+    name: zagoat-sandbox
+    internal: true
+
 volumes:
   postgres-data:
   redis-data:
