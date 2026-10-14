@@ -77,6 +77,9 @@ class Settings(BaseSettings):
     # Local-only sign-in without OAuth, for development. Refused in production.
     dev_login_enabled: bool = False
 
+    # Largest draft or submission, all files together (section 9, proposed).
+    max_code_bytes: int = 1_000_000
+
     # Sign-in and waitlist attempts per IP (section 9, proposed).
     ip_attempts_per_hour: int = 5
 
