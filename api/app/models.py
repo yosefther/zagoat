@@ -89,3 +89,20 @@ class Problem(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class Draft(Base):
+    """The user's latest editor contents for a problem, saved by debounced autosave."""
+
+    __tablename__ = "drafts"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    problem_id: Mapped[str] = mapped_column(
+        ForeignKey("problems.id", ondelete="CASCADE"), primary_key=True
+    )
+    files: Mapped[dict[str, str]] = mapped_column(JSONB)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
