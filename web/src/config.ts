@@ -24,6 +24,10 @@ export type WebConfig = {
   autosaveRetryMs: number;
   /** Monaco is loaded from this pinned CDN path (matches @monaco-editor/react's default). */
   monacoBaseUrl: string;
+  /** How often to ask the API about a running job (brief: every 1-2 s). */
+  jobPollIntervalMs: number;
+  /** Stop polling after this long and tell the user to reload. */
+  jobPollGiveUpMs: number;
 };
 
 type RawConfig = {
@@ -66,6 +70,8 @@ export function parseConfig(raw: RawConfig): WebConfig {
     autosaveDelayMs: 1000,
     autosaveRetryMs: 5000,
     monacoBaseUrl: "https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs",
+    jobPollIntervalMs: 1500,
+    jobPollGiveUpMs: 8 * 60 * 1000,
   };
 }
 

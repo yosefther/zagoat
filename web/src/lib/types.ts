@@ -39,3 +39,43 @@ export type ProblemDetail = ProblemSummary & {
   draft_files: Record<string, string> | null;
   draft_updated_at: string | null;
 };
+
+export type Verdict =
+  | "passed"
+  | "failed"
+  | "error"
+  | "time_limit"
+  | "memory_limit"
+  | "system_error";
+
+export type TestResult = {
+  name: string;
+  outcome: "passed" | "failed" | "error" | "skipped";
+  message: string | null;
+};
+
+export type MetricResult = {
+  name: string;
+  value: number | null;
+  threshold: number | null;
+  goal: "at_least" | "at_most" | null;
+  met: boolean | null;
+};
+
+export type Job = {
+  job_id: string;
+  problem_id: string;
+  problem_version: number;
+  kind: "run" | "submit";
+  status: "queued" | "running" | "done";
+  verdict: Verdict | null;
+  message: string | null;
+  tests_passed: number | null;
+  tests_total: number | null;
+  tests: TestResult[];
+  metrics: MetricResult[];
+  stdout: string | null;
+  stderr: string | null;
+  duration_ms: number | null;
+  created_at: string;
+};
