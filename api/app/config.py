@@ -26,6 +26,8 @@ REQUIRED_IN_PRODUCTION = (
     "web_origin",
     "api_origin",
     "secret_key",
+    "worker_secret",
+    "worker_allowed_ips",
 )
 
 
@@ -79,6 +81,19 @@ class Settings(BaseSettings):
 
     # Largest draft or submission, all files together (section 9, proposed).
     max_code_bytes: int = 1_000_000
+
+    # Job queue shared with the runner (JSON messages on a Redis list).
+    queue_key: str = "zagoat:jobs"
+    # Jobs older than this never ran: the worker drops them, and the API gives up on them a
+    # little later in case the worker is down (section 9).
+    queue_timeout_seconds: int = 300
+    queue_timeout_grace_seconds: int = 60
+    # Longest a job may run before the API treats it as lost (Submit limit plus slack).
+    job_run_timeout_seconds: int = 300
+
+    # Internal routes for the runner: shared secret plus IP allowlist (section 13).
+    worker_secret: str = "dev-only-worker-secret"  # noqa: S105
+    worker_allowed_ips: tuple[str, ...] = ("127.0.0.1", "::1")
 
     # Sign-in and waitlist attempts per IP (section 9, proposed).
     ip_attempts_per_hour: int = 5
