@@ -72,6 +72,27 @@ jobs:
       - name: Validate tasks
         run: uv run python -m zagoat_runner.validate ../problems
 
+  # Hardening tests against real containers (default runtime; gVisor is checked in production).
+  sandbox:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: runner
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          working-directory: runner
+          enable-cache: true
+      - run: uv sync --locked
+      - name: Build the task image
+        run: docker build -f images/py312-ml/Dockerfile -t zagoat-py312-ml:dev .
+      - name: Start the mock LLM on the sandbox network
+        run: docker compose -f ../infra/docker-compose.yml up -d --build --wait mockllm
+      - run: uv run pytest tests/test_sandbox.py
+        env:
+          ZAGOAT_SANDBOX_TESTS: "1"
+
   web:
     runs-on: ubuntu-24.04
     defaults:

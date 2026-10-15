@@ -16,6 +16,11 @@ updates:
       runner-minor-and-patch:
         update-types: [minor, patch]
 
+  - package-ecosystem: pip
+    directory: /runner/images/py312-ml
+    schedule:
+      interval: weekly
+
   - package-ecosystem: npm
     directory: /web
     schedule:
@@ -26,6 +31,11 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directories: [/runner, /runner/images/py312-ml]
     schedule:
       interval: weekly
 
