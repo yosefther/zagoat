@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { SolveArea } from "@/app/problems/[id]/SolveArea";
+import { SolveWorkspace } from "@/app/problems/[id]/SolveWorkspace";
 import { ApiError, request } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { ProblemDetail } from "@/lib/types";
@@ -54,7 +54,7 @@ export function ProblemWorkspace({ problemId }: { problemId: string }) {
       </Notice>
     );
   }
-  return <SolveArea problem={problem} />;
+  return <SolveWorkspace problem={problem} />;
 }
 
 function Notice({ title, children }: { title: string; children: React.ReactNode }) {

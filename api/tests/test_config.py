@@ -13,6 +13,8 @@ PRODUCTION: dict[str, Any] = {
     "api_origin": "https://api.zagoat.io",
     "secret_key": "a-long-random-secret",
     "cookie_secure": True,
+    "worker_secret": "a-long-worker-secret",
+    "worker_allowed_ips": ("198.51.100.7",),
 }
 
 
@@ -28,9 +30,8 @@ def test_development_works_with_defaults() -> None:
 
 
 def test_production_refuses_to_start_on_defaults() -> None:
-    with pytest.raises(
-        ValidationError, match="DATABASE_URL, REDIS_URL, WEB_ORIGIN, API_ORIGIN, SECRET_KEY"
-    ):
+    expected = "DATABASE_URL, REDIS_URL, WEB_ORIGIN, API_ORIGIN, SECRET_KEY, WORKER_SECRET"
+    with pytest.raises(ValidationError, match=expected):
         Settings(_env_file=None, environment=Environment.PRODUCTION, cookie_secure=True)
 
 

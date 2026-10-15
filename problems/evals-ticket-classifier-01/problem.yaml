@@ -7,7 +7,7 @@ category: evals
 difficulty: easy
 est_minutes: 30
 access: paid
-image: zagoat-py311-ml
+image: zagoat-py312-ml
 files:
   statement: statement.md
   starter: starter/

@@ -106,3 +106,30 @@ class Draft(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class Submission(Base):
+    """One Run or Submit. Its id is the job id the browser polls."""
+
+    __tablename__ = "submissions"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    problem_id: Mapped[str] = mapped_column(ForeignKey("problems.id", ondelete="CASCADE"))
+    problem_version: Mapped[int] = mapped_column(Integer)
+    kind: Mapped[str] = mapped_column(String(8))  # run | submit
+    files: Mapped[dict[str, str]] = mapped_column(JSONB)
+    status: Mapped[str] = mapped_column(String(8), default="queued")  # queued | running | done
+    verdict: Mapped[str | None] = mapped_column(String(16))
+    tests_passed: Mapped[int | None] = mapped_column(Integer)
+    tests_total: Mapped[int | None] = mapped_column(Integer)
+    # message, per-test results, and (Run only) stdout and stderr.
+    results: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    metrics: Mapped[list[dict[str, Any]] | None] = mapped_column(JSONB)
+    duration_ms: Mapped[int | None] = mapped_column(Integer)
+    # Whether this Submit uses up one of today's Submits (refunded on system_error).
+    counted: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

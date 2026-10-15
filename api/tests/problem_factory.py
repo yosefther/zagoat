@@ -15,7 +15,7 @@ category: rag
 difficulty: easy
 est_minutes: 30
 access: {access}
-image: zagoat-py311-ml
+image: zagoat-py312-ml
 """
 
 

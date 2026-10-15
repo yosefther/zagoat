@@ -32,7 +32,7 @@ difficulty: medium           # easy | medium | hard
 est_minutes: 45
 access: free                 # free | paid
 published: true              # optional; false hides the task
-image: zagoat-py311-ml
+image: zagoat-py312-ml
 files:                       # optional; these are the defaults
   statement: statement.md
   starter: starter/
