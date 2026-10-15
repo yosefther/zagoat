@@ -7,7 +7,7 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 ## Status
 
 Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts), 4
-(problems) and 5 (editor and drafts).
+(problems), 5 (editor and drafts) and 6 (runner).
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
@@ -16,6 +16,8 @@ or (locally only) a dev user, and the account page covers profile, the code opt-
 self-service deletion. Problems sync from `problems/` into Postgres and show up at
 `/problems`, with two original development tasks (one RAG, one evals). Signed-in users with
 access get a Monaco editor with a tab per file and debounced autosave of their draft.
+"Run tests" and "Submit solution" queue a job that the runner executes in a fresh,
+locked-down container; the page polls for the verdict, tests and metrics.
 
 ## Repo layout
 
@@ -23,7 +25,7 @@ access get a Monaco editor with a tab per file and debounced autosave of their d
 | --- | --- |
 | `api/` | FastAPI app (Python 3.12, SQLAlchemy, Alembic, Pydantic) |
 | `web/` | Next.js app (App Router, TypeScript, Tailwind) |
-| `runner/` | Grading harness, mock LLM and task validation; worker and sandbox come in Milestone 6 ([runner/README.md](runner/README.md)) |
+| `runner/` | Worker, Docker sandbox, task image, grading harness, mock LLM and task validation ([runner/README.md](runner/README.md)) |
 | `problems/` | One folder per practice task ([problems/README.md](problems/README.md) explains how to write one) |
 | `infra/` | docker-compose for local development; server scripts later |
 
@@ -37,13 +39,14 @@ access get a Monaco editor with a tab per file and debounced autosave of their d
 
 All commands start from the repo root.
 
-1. Start Postgres and Redis:
+1. Build the task image, then start Postgres, Redis and the mock LLM:
 
    ```sh
-   docker compose -f infra/docker-compose.yml up -d --wait
+   docker build -f runner/images/py312-ml/Dockerfile -t zagoat-py312-ml:dev runner
+   docker compose -f infra/docker-compose.yml up -d --build --wait
    ```
 
-   Both bind to `127.0.0.1` only. If ports 5432 or 6379 are taken, set `POSTGRES_PORT` or
+   Everything binds to `127.0.0.1` only. If ports 5432 or 6379 are taken, set `POSTGRES_PORT` or
    `REDIS_PORT` before running the command, and update the URLs in `api/.env` to match.
    The first start also creates a `zagoat_test` database for the test suite.
 
@@ -61,7 +64,19 @@ All commands start from the repo root.
    Check it with `curl localhost:8000/healthz`. Interactive docs are at `/docs` everywhere except
    production.
 
-3. Start the web app on <http://localhost:3000>:
+3. Start the runner worker (it needs Docker):
+
+   ```sh
+   cd runner
+   cp .env.example .env
+   uv sync
+   uv run python -m zagoat_runner.worker
+   ```
+
+   Without gVisor installed it prints a large warning and uses Docker's default runtime.
+   That's fine locally; production refuses to start without gVisor.
+
+4. Start the web app on <http://localhost:3000>:
 
    ```sh
    cd web
@@ -101,6 +116,7 @@ uv run ruff format --check .
 uv run mypy .
 uv run pytest
 uv run python -m zagoat_runner.validate ../problems
+ZAGOAT_SANDBOX_TESTS=1 uv run pytest tests/test_sandbox.py   # needs the image and mock LLM
 ```
 
 Web:
@@ -171,6 +187,25 @@ uv run alembic upgrade head
 ```
 
 New migration files are lint-fixed and formatted with ruff automatically.
+
+## How a Run or Submit works
+
+1. The browser posts the files to `POST /problems/{id}/runs` or `/submissions`. The API
+   checks access, allows one open job per user, saves a `submissions` row as `queued` and
+   pushes a JSON message onto the Redis list `zagoat:jobs`.
+2. The worker (`runner/zagoat_runner/worker.py`, 3 slots by default) moves the message to
+   a per-slot processing list, drops it as `system_error` if it waited over 5 minutes, and
+   starts a fresh container: gVisor, non-root, no capabilities, no-new-privileges,
+   read-only root, 200 MB `/tmp`, 1 CPU, 2 GB memory, 64 processes, and the internal
+   `zagoat-sandbox` network shared only with the mock LLM. Run mounts the sample tests;
+   Submit mounts the hidden tests. Data and tests are read-only; no secrets go in.
+3. The worker grades the outcome and posts it to `POST /internal/jobs/{id}/result`
+   (shared secret plus IP allowlist). The browser polls `GET /jobs/{id}` every 1.5 s.
+4. If the runner never answers, the API closes the job as `system_error` after the queue
+   timeout, so a user is never stuck.
+
+The queue is a plain Redis list of JSON messages rather than RQ: RQ pickles job
+arguments, which would let anyone who can write to Redis run code on the runner.
 
 ## Editor
 
