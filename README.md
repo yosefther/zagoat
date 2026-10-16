@@ -7,7 +7,7 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 ## Status
 
 Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts), 4
-(problems), 5 (editor and drafts) and 6 (runner).
+(problems), 5 (editor and drafts), 6 (runner) and 7 (business rules).
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
@@ -17,7 +17,9 @@ self-service deletion. Problems sync from `problems/` into Postgres and show up 
 `/problems`, with two original development tasks (one RAG, one evals). Signed-in users with
 access get a Monaco editor with a tab per file and debounced autosave of their draft.
 "Run tests" and "Submit solution" queue a job that the runner executes in a fresh,
-locked-down container; the page polls for the verdict, tests and metrics.
+locked-down container; the page polls for the verdict, tests and metrics. Plans, limits,
+progress, hints, walkthroughs, reference solutions, the timer and submission history follow
+sections 8 to 11 of the brief (summary below).
 
 ## Repo layout
 
@@ -187,6 +189,25 @@ uv run alembic upgrade head
 ```
 
 New migration files are lint-fixed and formatted with ruff automatically.
+
+## Business rules
+
+All rules live in the API; the web app only hides or shows buttons. Every tunable value is
+in `api/app/config.py`.
+
+| Rule | Where |
+| --- | --- |
+| Paid access from the subscriptions table on every request: unrefunded Lifetime, or Pro that is active, past due within 7 days, or canceled before period end | `api/app/plans.py` |
+| Free: 10 Submits a day, 30 Runs an hour. Paid: 100 and 120 | `api/app/usage.py` |
+| A Submit counts when queued and is refunded on `system_error`; Runs never use Submits; days reset at 00:00 UTC | `api/app/usage.py` |
+| One open job per user | `api/app/routes/jobs.py` |
+| Progress moves not_started → in_progress (draft save or Run) → attempted (first Submit) → solved (a passing Submit), never backwards | `api/app/progress.py` |
+| Hints one at a time, recorded, no penalty; walkthroughs for paid users any time; reference after the first Submit that isn't `system_error` | `api/app/routes/problems.py` |
+| After a downgrade, drafts, history and solved states stay; paid problems become read only | `api/app/routes/problems.py` |
+| The timer only records time to Submit (stored on the submission and progress) | `api/app/routes/jobs.py` |
+
+`GET /submissions` (all problems) and `PATCH /me` (code opt-in) are small additions to
+the route list in the brief.
 
 ## How a Run or Submit works
 
