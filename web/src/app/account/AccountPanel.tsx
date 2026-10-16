@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { ApiError, request } from "@/lib/api";
+import { PLAN_LABELS, formatLocalDateTime, formatLocalTime } from "@/lib/format";
 import { useSession } from "@/lib/session";
 import type { Me } from "@/lib/types";
 
@@ -84,6 +86,29 @@ export function AccountPanel() {
           <p className="font-display text-lg font-bold">{user.name ?? "No name set"}</p>
           <p className="text-muted">{user.email}</p>
         </div>
+      </section>
+
+      <section className="card flex flex-col gap-2 p-6">
+        <h2 className="text-xl font-bold">Plan</h2>
+        <p>
+          {PLAN_LABELS[user.plan.name]}
+          {user.plan.access_ends_at && (
+            <span className="text-muted">
+              {" "}
+              · access until {formatLocalDateTime(user.plan.access_ends_at)}
+            </span>
+          )}
+        </p>
+        <p className="text-sm text-muted">
+          {user.usage.submits_used} of {user.usage.submits_limit} Submits used today (resets at{" "}
+          {formatLocalTime(user.usage.submits_reset_at)}) · {user.usage.runs_used} of{" "}
+          {user.usage.runs_limit} test runs this hour
+        </p>
+        {user.plan.tier === "free" && (
+          <Link href="/pricing" className="self-start text-sm">
+            See plans
+          </Link>
+        )}
       </section>
 
       <section className="card flex flex-col gap-3 p-6">

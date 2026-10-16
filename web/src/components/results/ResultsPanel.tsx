@@ -78,11 +78,16 @@ function Verdict({ job }: { job: Job }) {
               </span>
               <div className="min-w-0">
                 <p>{test.name}</p>
-                {test.message && (
-                  <pre className="mt-1 font-mono text-xs whitespace-pre-wrap text-muted">
-                    {test.message}
-                  </pre>
-                )}
+                {test.message &&
+                  (job.kind === "submit" ? (
+                    // Author-written sentences for hidden tests.
+                    <p className="text-muted">{test.message}</p>
+                  ) : (
+                    // Sample tests: pytest's assertion detail is code-like.
+                    <pre className="mt-1 font-mono text-xs whitespace-pre-wrap text-muted">
+                      {test.message}
+                    </pre>
+                  ))}
               </div>
             </li>
           ))}

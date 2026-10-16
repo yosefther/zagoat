@@ -95,6 +95,14 @@ class Settings(BaseSettings):
     worker_secret: str = "dev-only-worker-secret"  # noqa: S105
     worker_allowed_ips: tuple[str, ...] = ("127.0.0.1", "::1")
 
+    # Plans and limits (sections 8 and 9). Lifetime and Pro share the paid limits.
+    free_submits_per_day: int = 10
+    paid_submits_per_day: int = 100  # fair use, proposed
+    free_runs_per_hour: int = 30  # proposed
+    paid_runs_per_hour: int = 120  # proposed
+    # A Pro subscription whose payment failed keeps access this long (section 10, proposed).
+    past_due_grace_days: int = 7
+
     # Sign-in and waitlist attempts per IP (section 9, proposed).
     ip_attempts_per_hour: int = 5
 

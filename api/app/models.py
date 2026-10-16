@@ -1,10 +1,20 @@
 """ORM models for every table in section 6 of the brief."""
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    Boolean,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -131,5 +141,63 @@ class Submission(Base):
     duration_ms: Mapped[int | None] = mapped_column(Integer)
     # Whether this Submit uses up one of today's Submits (refunded on system_error).
     counted: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Seconds on the optional timer when the user pressed Submit. Never affects the verdict.
+    timer_seconds: Mapped[int | None] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Progress(Base):
+    """Where a user is on one problem. States only move forward (section 11)."""
+
+    __tablename__ = "progress"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    problem_id: Mapped[str] = mapped_column(
+        ForeignKey("problems.id", ondelete="CASCADE"), primary_key=True
+    )
+    # not_started | in_progress | attempted | solved
+    state: Mapped[str] = mapped_column(String(16), default="not_started")
+    hints_revealed: Mapped[int] = mapped_column(Integer, default=0)
+    first_submit_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    solved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Timer reading at the most recent timed Submit.
+    timer_seconds: Mapped[int | None] = mapped_column(Integer)
+
+
+class UsageDaily(Base):
+    """Submits used per UTC day (section 9)."""
+
+    __tablename__ = "usage_daily"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    submits: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class Subscription(Base):
+    """A Pro subscription or Lifetime purchase, mirrored from the payment provider."""
+
+    __tablename__ = "subscriptions"
+    __table_args__ = (UniqueConstraint("provider", "provider_ref"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    provider: Mapped[str] = mapped_column(String(32))
+    provider_ref: Mapped[str] = mapped_column(String(255))
+    plan: Mapped[str] = mapped_column(String(16))  # pro_monthly | pro_yearly | lifetime
+    # active | past_due | canceled | expired | refunded
+    status: Mapped[str] = mapped_column(String(16))
+    current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # When the status last became past_due; the grace period counts from here.
+    past_due_since: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
