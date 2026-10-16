@@ -10,14 +10,18 @@ from app.clock import utcnow
 from app.code_files import validate_files
 from app.config import Settings, get_settings
 from app.db import DbSession
+from app.entitlements import require_solvable
 from app.errors import AppError
 from app.jobs import enqueue, expire_if_stale, is_open
 from app.models import Submission, User
+from app.plans import plan_for
+from app.progress import mark_started, record_result
 from app.redis_client import RedisClient
-from app.routes.problems import get_published, require_solvable
+from app.routes.problems import HistoryItem, get_published, history_item
 from app.security.csrf import require_csrf
 from app.security.internal import require_worker
 from app.security.sessions import RequiredAuth
+from app.usage import refund_submit, take_run, take_submit
 
 router = APIRouter()
 
@@ -27,6 +31,8 @@ Verdict = Literal["passed", "failed", "error", "time_limit", "memory_limit", "sy
 
 class JobRequest(BaseModel):
     files: dict[str, str]
+    # Optional timer reading for Submits (section 2: timer mode). Never affects the verdict.
+    timer_seconds: int | None = Field(default=None, ge=0, le=7 * 24 * 3600)
 
 
 class JobCreated(BaseModel):
@@ -48,6 +54,8 @@ class JobResponse(BaseModel):
     stdout: str | None
     stderr: str | None
     duration_ms: int | None
+    timer_seconds: int | None
+    files: dict[str, str]
     created_at: datetime
 
 
@@ -68,6 +76,8 @@ def job_response(submission: Submission) -> JobResponse:
         stdout=results.get("stdout"),
         stderr=results.get("stderr"),
         duration_ms=submission.duration_ms,
+        timer_seconds=submission.timer_seconds,
+        files=submission.files,
         created_at=submission.created_at,
     )
 
@@ -91,7 +101,8 @@ def create_job(
     settings: Settings,
 ) -> JobCreated:
     problem = get_published(db, problem_id)
-    require_solvable(db, problem, auth)
+    plan = plan_for(db, auth.user, settings)
+    require_solvable(problem, auth.user, plan)
     files = validate_files(body.files, problem, settings)
 
     # Lock the user's row so two clicks at once can't both pass the one-job-at-a-time check.
@@ -110,6 +121,13 @@ def create_job(
             "You already have a run or submission in progress. Wait for it to finish.",
         )
 
+    # Limits are checked before anything is queued (section 9).
+    if kind == "submit":
+        take_submit(db, auth.user, plan)
+    else:
+        take_run(redis, auth.user, plan)
+        mark_started(db, auth.user.id, problem.id)
+
     submission = Submission(
         user_id=auth.user.id,
         problem_id=problem.id,
@@ -117,6 +135,8 @@ def create_job(
         kind=kind,
         files=files,
         status="queued",
+        counted=kind == "submit",
+        timer_seconds=body.timer_seconds if kind == "submit" else None,
         created_at=utcnow(),
     )
     db.add(submission)
@@ -158,6 +178,20 @@ def create_submission(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> JobCreated:
     return create_job("submit", problem_id, body, db, redis, auth, settings)
+
+
+@router.get("/submissions", response_model=list[HistoryItem])
+def all_history(
+    db: DbSession, auth: RequiredAuth, kind: Kind = "submit", limit: int = 50
+) -> list[HistoryItem]:
+    """The user's recent Submits (or Runs) across every problem, newest first."""
+    rows = db.scalars(
+        select(Submission)
+        .where(Submission.user_id == auth.user.id, Submission.kind == kind)
+        .order_by(Submission.created_at.desc())
+        .limit(max(1, min(limit, 200)))
+    ).all()
+    return [history_item(row) for row in rows]
 
 
 @router.get("/jobs/{job_id}", response_model=JobResponse)
@@ -214,4 +248,7 @@ def job_result(job_id: str, body: WorkerResult, db: DbSession) -> None:
         results |= {"stdout": body.stdout, "stderr": body.stderr}
     submission.results = results
     submission.finished_at = utcnow()
+    if body.verdict == "system_error":
+        refund_submit(db, submission)
+    record_result(db, submission)
     db.commit()

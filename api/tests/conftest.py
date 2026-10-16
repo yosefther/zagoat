@@ -1,5 +1,6 @@
 import os
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -7,6 +8,7 @@ from alembic import command
 from alembic.config import Config
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from httpx2 import Response
 from redis import Redis
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session
@@ -14,7 +16,7 @@ from sqlalchemy.orm import Session
 from app.config import Environment, Settings
 from app.db import get_db
 from app.main import create_app
-from app.models import User
+from app.models import Subscription, User
 
 # Tests use their own database and Redis db number so they never touch dev data.
 TEST_DATABASE_URL = os.environ.get(
@@ -107,3 +109,83 @@ def sign_in(client: TestClient, db: Session, email: str = "ada@example.com") -> 
     db.commit()
     client.cookies.set("zagoat_session", token)
     return user
+
+
+WORKER_HEADERS = {"X-Worker-Secret": "dev-only-worker-secret"}
+CLOCK_MODULES = (
+    "app.clock",
+    "app.usage",
+    "app.plans",
+    "app.jobs",
+    "app.progress",
+    "app.ratelimit",
+    "app.routes.jobs",
+    "app.security.sessions",
+)
+
+
+@pytest.fixture
+def worker(app: FastAPI) -> TestClient:
+    """A client calling from an allowed IP, like the runner."""
+    return TestClient(app, client=("127.0.0.1", 50000))
+
+
+@pytest.fixture
+def freeze(monkeypatch: pytest.MonkeyPatch) -> Callable[[datetime], None]:
+    """Set "now" for every module that reads the clock."""
+    import importlib
+
+    def set_now(moment: datetime) -> None:
+        for name in CLOCK_MODULES:
+            monkeypatch.setattr(importlib.import_module(name), "utcnow", lambda: moment)
+
+    return set_now
+
+
+def finish_job(worker: TestClient, job_id: str, verdict: str = "failed", **extra: object) -> None:
+    body = {"verdict": verdict, "tests_passed": 0, "tests_total": 1, **extra}
+    response = worker.post(f"/internal/jobs/{job_id}/result", json=body, headers=WORKER_HEADERS)
+    assert response.status_code == 204
+
+
+def start_job(
+    client: TestClient, problem_id: str, kind: str = "submit", **extra: object
+) -> Response:
+    path = "submissions" if kind == "submit" else "runs"
+    return client.post(
+        f"/problems/{problem_id}/{path}",
+        json={"files": {}, **extra},
+        headers=csrf_headers(client),
+    )
+
+
+def submit_and_finish(
+    client: TestClient, worker: TestClient, problem_id: str, verdict: str = "failed"
+) -> str:
+    response = start_job(client, problem_id)
+    assert response.status_code == 202, response.text
+    job_id = str(response.json()["job_id"])
+    finish_job(worker, job_id, verdict)
+    return job_id
+
+
+def give_subscription(
+    db: Session,
+    user: User,
+    plan: str = "lifetime",
+    status: str = "active",
+    period_end: datetime | None = None,
+    past_due_since: datetime | None = None,
+) -> Subscription:
+    sub = Subscription(
+        user_id=user.id,
+        provider="fake",
+        provider_ref=f"ref-{plan}-{status}-{user.id.hex[:8]}-{datetime.now().timestamp()}",
+        plan=plan,
+        status=status,
+        current_period_end=period_end,
+        past_due_since=past_due_since,
+    )
+    db.add(sub)
+    db.commit()
+    return sub

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.clock import utcnow
 from app.config import Settings
 from app.models import Submission
+from app.usage import refund_submit
 
 QUEUE_TIMEOUT_MESSAGE = "Something went wrong on our side. This attempt doesn't count. Try again."
 
@@ -42,9 +43,10 @@ def is_stale(submission: Submission, settings: Settings) -> bool:
 
 
 def expire_if_stale(db: Session, submission: Submission, settings: Settings) -> bool:
-    """Close a lost job as system_error (brief, section 9). Returns True if it did."""
+    """Close a lost job as system_error and refund it (brief, section 9). True if it did."""
     if not is_open(submission) or not is_stale(submission, settings):
         return False
+    refund_submit(db, submission)
     submission.status = "done"
     submission.verdict = "system_error"
     submission.results = {"message": QUEUE_TIMEOUT_MESSAGE, "tests": []}
