@@ -1,5 +1,16 @@
 /** Shapes returned by the zagoat API. */
 
+export type Usage = {
+  submits_used: number;
+  submits_limit: number;
+  submits_reset_at: string;
+  runs_used: number;
+  runs_limit: number;
+  runs_reset_at: string;
+};
+
+export type PlanName = "free" | "lifetime" | "pro_monthly" | "pro_yearly";
+
 export type Me = {
   id: string;
   email: string;
@@ -7,6 +18,8 @@ export type Me = {
   avatar_url: string | null;
   code_opt_in: boolean;
   created_at: string;
+  plan: { tier: "free" | "paid"; name: PlanName; access_ends_at: string | null };
+  usage: Usage;
 };
 
 export type Access = "free" | "paid";
@@ -35,9 +48,37 @@ export type ProblemDetail = ProblemSummary & {
   hint_count: number;
   has_walkthrough: boolean;
   lock: "sign_in" | "paid" | null;
+  read_only: boolean;
   starter_files: Record<string, string> | null;
   draft_files: Record<string, string> | null;
   draft_updated_at: string | null;
+  hints: string[];
+  progress_detail: {
+    state: string;
+    hints_revealed: number;
+    first_submit_at: string | null;
+    solved_at: string | null;
+    timer_seconds: number | null;
+  } | null;
+  reference_unlocked: boolean;
+  walkthrough_unlocked: boolean;
+  plan: PlanName | null;
+  usage: Usage | null;
+};
+
+export type HistoryItem = {
+  job_id: string;
+  problem_id: string;
+  problem_version: number;
+  kind: "run" | "submit";
+  status: "queued" | "running" | "done";
+  verdict: Verdict | null;
+  tests_passed: number | null;
+  tests_total: number | null;
+  metrics: MetricResult[];
+  duration_ms: number | null;
+  timer_seconds: number | null;
+  created_at: string;
 };
 
 export type Verdict =
@@ -77,5 +118,7 @@ export type Job = {
   stdout: string | null;
   stderr: string | null;
   duration_ms: number | null;
+  timer_seconds: number | null;
+  files: Record<string, string>;
   created_at: string;
 };

@@ -2,30 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
+import { useProblem } from "@/app/problems/[id]/ProblemContext";
+import { SolveArea } from "@/app/problems/[id]/SolveArea";
 import { SolveWorkspace } from "@/app/problems/[id]/SolveWorkspace";
-import { ApiError, request } from "@/lib/api";
-import { useSession } from "@/lib/session";
-import type { ProblemDetail } from "@/lib/types";
 
-/** The signed-in side of the problem page: lock states, then the editor and results. */
-export function ProblemWorkspace({ problemId }: { problemId: string }) {
-  const session = useSession();
+/** The right-hand side of the problem page: lock states, then the editor and results. */
+export function ProblemWorkspace() {
+  const { problem, error } = useProblem();
   const pathname = usePathname();
-  const [problem, setProblem] = useState<ProblemDetail | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (session.status === "loading") return;
-    let active = true;
-    request<ProblemDetail>(`/problems/${encodeURIComponent(problemId)}`)
-      .then((data) => active && setProblem(data))
-      .catch((err) => active && setError(err instanceof ApiError ? err.message : String(err)));
-    return () => {
-      active = false;
-    };
-  }, [problemId, session.status]);
 
   if (error) {
     return <Notice title="We couldn't load your workspace">{error}</Notice>;
@@ -42,6 +27,17 @@ export function ProblemWorkspace({ problemId }: { problemId: string }) {
           Sign in to start
         </Link>
       </Notice>
+    );
+  }
+  if (problem.read_only) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-border bg-code px-4 py-2 text-sm">
+          Your plan no longer includes this problem, so your code is read only.
+          <Link href="/pricing">See plans</Link>
+        </p>
+        <SolveArea problem={problem} readOnly />
+      </div>
     );
   }
   if (problem.lock === "paid") {

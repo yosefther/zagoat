@@ -62,6 +62,13 @@ export function UserMenu() {
       <div className="card absolute right-0 z-20 mt-2 flex w-56 flex-col p-1 text-sm shadow-lg">
         <p className="truncate px-3 py-2 text-muted">{user.email}</p>
         <Link
+          href="/history"
+          className="rounded-md px-3 py-2 text-ink no-underline hover:bg-code"
+          onClick={() => menu.current?.removeAttribute("open")}
+        >
+          Submission history
+        </Link>
+        <Link
           href="/account"
           className="rounded-md px-3 py-2 text-ink no-underline hover:bg-code"
           onClick={() => menu.current?.removeAttribute("open")}

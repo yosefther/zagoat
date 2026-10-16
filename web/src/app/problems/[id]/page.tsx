@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { ProblemProvider } from "@/app/problems/[id]/ProblemContext";
+import { ProblemExtras } from "@/app/problems/[id]/ProblemExtras";
 import { ProblemWorkspace } from "@/app/problems/[id]/ProblemWorkspace";
 import { Markdown } from "@/components/Markdown";
 import { ProblemMeta } from "@/components/ProblemMeta";
@@ -42,18 +44,21 @@ async function ProblemView({ params }: { params: Promise<{ id: string }> }) {
   if (!problem) notFound();
 
   return (
-    <main className="flex flex-1 flex-col lg:grid lg:h-[calc(100dvh-4rem)] lg:flex-none lg:grid-cols-[minmax(22rem,2fr)_3fr]">
-      <article className="flex min-w-0 flex-col gap-4 overflow-y-auto border-border px-4 py-8 sm:px-6 lg:border-r">
-        <ProblemMeta problem={problem} />
-        <h1 className="text-2xl font-bold">{problem.title}</h1>
-        <p className="rounded-lg border border-border bg-code p-3 text-sm lg:hidden">
-          Solving works on desktop. Open this page on a larger screen to write and run code.
-        </p>
-        <Markdown className="max-w-prose">{problem.statement}</Markdown>
-      </article>
-      <section aria-label="Workspace" className="hidden min-h-0 min-w-0 flex-col lg:flex">
-        <ProblemWorkspace problemId={problem.id} />
-      </section>
-    </main>
+    <ProblemProvider problemId={problem.id}>
+      <main className="flex flex-1 flex-col lg:grid lg:h-[calc(100dvh-4rem)] lg:flex-none lg:grid-cols-[minmax(22rem,2fr)_3fr]">
+        <article className="flex min-w-0 flex-col gap-4 overflow-y-auto border-border px-4 py-8 sm:px-6 lg:border-r">
+          <ProblemMeta problem={problem} />
+          <h1 className="text-2xl font-bold">{problem.title}</h1>
+          <p className="rounded-lg border border-border bg-code p-3 text-sm lg:hidden">
+            Solving works on desktop. Open this page on a larger screen to write and run code.
+          </p>
+          <Markdown className="max-w-prose">{problem.statement}</Markdown>
+          <ProblemExtras />
+        </article>
+        <section aria-label="Workspace" className="hidden min-h-0 min-w-0 flex-col lg:flex">
+          <ProblemWorkspace />
+        </section>
+      </main>
+    </ProblemProvider>
   );
 }
