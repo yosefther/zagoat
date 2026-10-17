@@ -2,14 +2,16 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Response, status
 from pydantic import BaseModel
 from redis import Redis
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
 from app.db import DbSession
-from app.models import User
+from app.errors import AppError
+from app.models import Subscription, User
 from app.plans import plan_for
 from app.redis_client import RedisClient
 from app.routes.problems import UsageOut
@@ -88,8 +90,23 @@ def delete_me(
 ) -> None:
     """Delete the account and everything tied to it at once (section 11).
 
-    Foreign keys cascade to sessions, OAuth accounts, drafts, submissions, progress and usage.
+    Foreign keys cascade to sessions, OAuth accounts, drafts, submissions, progress, usage and
+    our copy of subscriptions; billing records stay with the payment provider. A renewing Pro
+    subscription must be canceled first so nobody is charged for a deleted account.
     """
+    renewing = db.scalar(
+        select(Subscription.id).where(
+            Subscription.user_id == auth.user.id,
+            Subscription.plan != "lifetime",
+            Subscription.status.in_(("active", "past_due")),
+        )
+    )
+    if renewing is not None:
+        raise AppError(
+            status.HTTP_409_CONFLICT,
+            "subscription_active",
+            "Cancel your Pro subscription in the billing portal first, then delete your account.",
+        )
     db.delete(auth.user)
     db.commit()
     clear_session_cookie(response, settings)

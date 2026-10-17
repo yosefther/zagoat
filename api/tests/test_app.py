@@ -33,6 +33,7 @@ def test_docs_are_hidden_in_production(settings: Settings) -> None:
         cookie_secure=True,
         worker_secret="a-long-worker-secret",
         worker_allowed_ips=("198.51.100.7",),
+        payment_provider=None,
     )
     client = TestClient(create_app(production))
 

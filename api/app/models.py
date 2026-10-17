@@ -201,3 +201,16 @@ class Subscription(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class WebhookEvent(Base):
+    """Every payment webhook we accepted, so a repeated delivery is skipped (section 10)."""
+
+    __tablename__ = "webhook_events"
+
+    provider_event_id: Mapped[str] = mapped_column(String(255), primary_key=True)
+    type: Mapped[str] = mapped_column(String(64))
+    received_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
