@@ -33,6 +33,7 @@ export type ProblemSummary = {
   est_minutes: number;
   access: Access;
   progress: "not_started" | "in_progress" | "attempted" | "solved" | null;
+  best_result: { value: number; label: string } | null;
 };
 
 export type MetricSpec = {
@@ -44,6 +45,7 @@ export type MetricSpec = {
 export type ProblemDetail = ProblemSummary & {
   version: number;
   statement: string;
+  sample_tests: Record<string, string>;
   metrics: MetricSpec[];
   hint_count: number;
   has_walkthrough: boolean;

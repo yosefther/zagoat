@@ -46,7 +46,7 @@ export function WaitlistForm({ source = "landing" }: { source?: string }) {
 
   if (status.kind === "joined") {
     return (
-      <p role="status" className="card max-w-xl p-4 font-medium text-success">
+      <p role="status" className="panel max-w-xl p-4 font-medium text-success">
         You&apos;re on the list. We&apos;ll email {email} when zagoat launches.
       </p>
     );
@@ -88,7 +88,7 @@ export function WaitlistForm({ source = "landing" }: { source?: string }) {
         <input
           id={`${id}-consent`}
           type="checkbox"
-          className="mt-1 size-4 accent-[var(--ink)]"
+          className="mt-1 size-4 accent-brand"
           checked={consent}
           onChange={(event) => setConsent(event.target.checked)}
           aria-invalid={consentError ? true : undefined}

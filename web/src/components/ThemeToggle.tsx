@@ -2,17 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 
-import { THEME_STORAGE_KEY, type ThemeChoice } from "@/lib/theme";
+import { DEFAULT_THEME, THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 const listeners = new Set<() => void>();
 
-function readChoice(): ThemeChoice {
-  try {
-    const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    return saved === "light" || saved === "dark" ? saved : "auto";
-  } catch {
-    return "auto";
-  }
+function readTheme(): Theme {
+  const current = document.documentElement.getAttribute("data-theme");
+  return current === "light" || current === "dark" ? current : DEFAULT_THEME;
 }
 
 function subscribe(listener: () => void) {
@@ -20,32 +16,46 @@ function subscribe(listener: () => void) {
   return () => listeners.delete(listener);
 }
 
-function applyChoice(choice: ThemeChoice) {
+function setTheme(theme: Theme) {
   try {
-    if (choice === "auto") localStorage.removeItem(THEME_STORAGE_KEY);
-    else localStorage.setItem(THEME_STORAGE_KEY, choice);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {
-    // Storage can be blocked; the choice still applies to this page view.
+    // Storage can be blocked; the theme still applies to this page view.
   }
-  if (choice === "auto") document.documentElement.removeAttribute("data-theme");
-  else document.documentElement.setAttribute("data-theme", choice);
+  document.documentElement.setAttribute("data-theme", theme);
   listeners.forEach((listener) => listener());
 }
 
+/** Dark by default (section 12); one button switches to light and back. */
 export function ThemeToggle() {
-  const choice = useSyncExternalStore(subscribe, readChoice, () => "auto" as ThemeChoice);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => DEFAULT_THEME);
+  const next = theme === "dark" ? "light" : "dark";
   return (
-    <label className="inline-flex items-center gap-2 text-sm text-muted">
-      Theme
-      <select
-        className="rounded-md border border-field bg-surface px-2 py-1 text-ink"
-        value={choice}
-        onChange={(event) => applyChoice(event.target.value as ThemeChoice)}
-      >
-        <option value="auto">Match system</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
-    </label>
+    <button
+      type="button"
+      onClick={() => setTheme(next)}
+      className="btn-quiet px-2"
+      aria-label={`Switch to ${next} theme`}
+      title={`Switch to ${next} theme`}
+    >
+      {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+    </button>
+  );
+}
+
+function SunIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+    </svg>
   );
 }
