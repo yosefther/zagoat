@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { ApiError, request } from "@/lib/api";
@@ -20,6 +20,16 @@ export function AccountPanel() {
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const params = useSearchParams();
+  const justPaid = params.get("checkout") === "success";
+  const { refresh } = session;
+
+  // A provider's webhook can land a moment after the redirect: check a few times.
+  useEffect(() => {
+    if (!justPaid) return;
+    const timers = [1500, 4000, 8000].map((ms) => setTimeout(() => void refresh(), ms));
+    return () => timers.forEach(clearTimeout);
+  }, [justPaid, refresh]);
 
   // Visitors go to sign-in. After signing out or deleting the account here, the action that
   // ended the session decides where to go instead.
@@ -50,6 +60,16 @@ export function AccountPanel() {
     }
   }
 
+  async function openPortal() {
+    setError(null);
+    try {
+      const { url } = await request<{ url: string }>("/billing/portal");
+      window.location.assign(url);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't open billing. Try again.");
+    }
+  }
+
   async function deleteAccount() {
     setDeleting(true);
     setError(null);
@@ -65,6 +85,11 @@ export function AccountPanel() {
 
   return (
     <div className="flex max-w-2xl flex-col gap-8">
+      {justPaid && (
+        <p role="status" className="rounded-lg border border-success p-3 text-sm text-success">
+          Thanks for your purchase. Your plan updates as soon as the payment is confirmed.
+        </p>
+      )}
       {error && (
         <p role="alert" className="rounded-lg border border-danger p-3 text-sm text-danger">
           {error}
@@ -104,10 +129,14 @@ export function AccountPanel() {
           {formatLocalTime(user.usage.submits_reset_at)}) · {user.usage.runs_used} of{" "}
           {user.usage.runs_limit} test runs this hour
         </p>
-        {user.plan.tier === "free" && (
+        {user.plan.tier === "free" ? (
           <Link href="/pricing" className="self-start text-sm">
             See plans
           </Link>
+        ) : (
+          <button type="button" className="btn-secondary self-start" onClick={openPortal}>
+            Manage billing
+          </button>
         )}
       </section>
 

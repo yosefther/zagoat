@@ -122,3 +122,15 @@ export type Job = {
   files: Record<string, string>;
   created_at: string;
 };
+
+export type Plans = {
+  currency: string;
+  lifetime_price_cents: number | null;
+  lifetime_available: boolean;
+  lifetime_remaining: number;
+  pro_enabled: boolean;
+  pro_monthly_price_cents: number;
+  pro_yearly_price_cents: number;
+  payments_enabled: boolean;
+  current_plan: PlanName | null;
+};
