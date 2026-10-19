@@ -1,37 +1,27 @@
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { Logo } from "@/components/Logo";
+import { NavLinks } from "@/components/NavLinks";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
-import { Wordmark } from "@/components/Wordmark";
-
-const NAV_LINKS = [
-  { href: "/problems", label: "Problems" },
-  { href: "/pricing", label: "Pricing" },
-];
 
 export function SiteHeader() {
   return (
-    <header className="border-b border-border bg-surface">
-      <div className="container-page flex h-16 items-center justify-between gap-4">
-        <Wordmark />
-        <nav aria-label="Main" className="flex items-center gap-2 sm:gap-4">
-          <ul className="flex items-center gap-1 text-sm font-medium sm:gap-4">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="rounded-md px-2 py-1.5 text-ink no-underline hover:underline"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {/* The menu reads the current path, which dynamic routes only know at request time. */}
-          <Suspense fallback={<span className="inline-block h-9 w-20" aria-hidden="true" />}>
-            <UserMenu />
+    <header className="sticky top-0 z-30 border-b border-line bg-page/95 backdrop-blur">
+      <div className="container-page flex h-[var(--header-height)] items-center gap-3 sm:gap-6">
+        <Logo />
+        <nav aria-label="Main" className="flex flex-1 items-center text-sm sm:gap-1">
+          <Suspense fallback={null}>
+            <NavLinks />
           </Suspense>
         </nav>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <ThemeToggle />
+          {/* The menu reads the current path, which dynamic routes only know at request time. */}
+          <Suspense fallback={<span className="inline-block h-9 w-16" aria-hidden="true" />}>
+            <UserMenu />
+          </Suspense>
+        </div>
       </div>
     </header>
   );

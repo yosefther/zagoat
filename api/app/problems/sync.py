@@ -31,11 +31,12 @@ def _apply(row: Problem, problem: PublicProblem) -> None:
     row.hints = problem.hints
     row.walkthrough = problem.walkthrough
     row.reference_files = problem.reference_files
+    row.sample_tests = problem.sample_tests
     row.metrics = [metric.model_dump() for metric in spec.grader.metrics]
 
 
 def sync_problems(db: Session, problems: list[PublicProblem]) -> SyncReport:
-    """Upsert problems. Any content change bumps the version; missing problems are unpublished.
+    """Upsert problems. Content changes bump the version; missing problems are unpublished.
 
     Rows are never deleted, because submissions keep pointing at them.
     """
@@ -48,13 +49,15 @@ def sync_problems(db: Session, problems: list[PublicProblem]) -> SyncReport:
             _apply(row, problem)
             db.add(row)
             report.created.append(row.id)
-        elif row.content_hash != problem.content_hash or row.published != problem.spec.published:
+        else:
+            changed = (
+                row.content_hash != problem.content_hash or row.published != problem.spec.published
+            )
             if row.content_hash != problem.content_hash:
                 row.version += 1
+            # Always refresh the stored fields, so columns added later get filled in.
             _apply(row, problem)
-            report.updated.append(row.id)
-        else:
-            report.unchanged.append(row.id)
+            (report.updated if changed else report.unchanged).append(row.id)
     for row in existing.values():
         if row.published:
             row.published = False

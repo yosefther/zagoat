@@ -48,29 +48,29 @@ export function UserMenu() {
             width={32}
             height={32}
             unoptimized
-            className="size-8 rounded-full border border-border"
+            className="size-8 rounded-full border border-line"
           />
         ) : (
           <span
             aria-hidden="true"
-            className="grid size-8 place-items-center rounded-full bg-code font-medium"
+            className="grid size-8 place-items-center rounded-full bg-raised font-medium"
           >
             {label.slice(0, 1).toUpperCase()}
           </span>
         )}
       </summary>
-      <div className="card absolute right-0 z-20 mt-2 flex w-56 flex-col p-1 text-sm shadow-lg">
+      <div className="absolute right-0 z-40 mt-2 flex w-56 flex-col rounded-md bg-raised p-1 text-sm shadow-raised">
         <p className="truncate px-3 py-2 text-muted">{user.email}</p>
         <Link
           href="/history"
-          className="rounded-md px-3 py-2 text-ink no-underline hover:bg-code"
+          className="rounded-md px-3 py-2 text-ink no-underline hover:bg-panel"
           onClick={() => menu.current?.removeAttribute("open")}
         >
           Submission history
         </Link>
         <Link
           href="/account"
-          className="rounded-md px-3 py-2 text-ink no-underline hover:bg-code"
+          className="rounded-md px-3 py-2 text-ink no-underline hover:bg-panel"
           onClick={() => menu.current?.removeAttribute("open")}
         >
           Account
@@ -78,7 +78,7 @@ export function UserMenu() {
         <button
           type="button"
           onClick={onSignOut}
-          className="rounded-md px-3 py-2 text-left hover:bg-code"
+          className="rounded-md px-3 py-2 text-left hover:bg-panel"
         >
           Sign out
         </button>

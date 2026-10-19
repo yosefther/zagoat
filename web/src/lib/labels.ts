@@ -5,6 +5,12 @@ export const CATEGORY_LABELS: Record<string, string> = {
   serving: "Serving",
 };
 
+export const DIFFICULTY_LABELS = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+} as const;
+
 export const ACCESS_LABELS = {
   free: "Free",
   paid: "Lifetime and Pro",

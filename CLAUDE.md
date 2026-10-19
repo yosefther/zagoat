@@ -32,6 +32,7 @@ Not in the MVP: AI feedback or AI hints, mock interviews, leaderboards, certific
 | Part | Choice |
 | --- | --- |
 | Web app | Next.js (App Router), TypeScript, Tailwind, Monaco editor; deployed on Vercel free tier |
+| 3D (landing hero only) | three.js through React Three Fiber and drei, lazy-loaded |
 | API | FastAPI on Python 3.11+, with SQLAlchemy, Alembic and Pydantic |
 | Database | Postgres |
 | Queue | Redis plus one worker process (RQ or similar) |
@@ -250,18 +251,15 @@ Webhook rules:
 
 Pages: landing (`/`), problems (`/problems`), problem (`/problems/[id]`), history (`/history`), pricing (`/pricing`), account (`/account`), sign-in (`/signin`), privacy (`/privacy`), terms (`/terms`) and a 404 page.
 
-- Landing: the core promise as the headline, 2–3 sample tasks as read-only previews, a waitlist form (email plus consent checkbox) and a link to pricing. The privacy page must be live before the waitlist collects any email.
-- Problem page on desktop: statement on the left, editor on the right, results panel at the bottom, with Run and Submit buttons, remaining Submits, the timer toggle, hints and unlock states.
+- Landing: the 3D hero, then 2–3 real sample tasks as read-only previews, pricing, and a waitlist form (email plus consent checkbox). The privacy page must be live before the waitlist collects any email.
 - Privacy and terms: simple placeholder text, clearly marked for my review before launch.
 
-Design direction:
+All UI work follows the project skill in `.claude/skills/zagoat-design/SKILL.md` (you can also run it with `/zagoat-design`), together with Anthropic's `frontend-design` skill when it's installed. The skill holds the full design rules. The essentials:
 
-- Name: always "zagoat" in lowercase. The logo is a geometric goat head whose horns are curly braces. Use files from `/web/public/brand/` if they exist; otherwise use a text wordmark.
-- Colors: deep indigo `#1E1B4B` as the primary and electric lime `#A3E635` as a small accent (primary button, focus rings, success states). Avoid the generic near-black-plus-acid-green "hacker" look. Light mode by default, with a real dark mode.
-- Type: choose one or two families on purpose; Space Grotesk was suggested for the wordmark. Keep text lines under 80 characters.
-- Before building any UI, propose a compact design plan (4–6 hex colors, typefaces and type scale, rough layout sketches for the landing and problem pages) and wait for my OK.
-- Quality floor: responsive layouts, visible keyboard focus, reduced motion respected, WCAG AA contrast.
-- Copy: plain, specific, sentence case. Buttons say what they do ("Run tests", "Submit solution"). Errors say what happened and how to fix it.
+- The logo at `web/public/brand/logo.png` is used as-is, and the color palette is built from it. The old indigo and lime palette is retired.
+- LeetCode is a reference for layout and flow only; never copy its look, assets or wording.
+- The landing page has a 3D hero, with a static fallback for reduced motion, missing WebGL and phones.
+- Show a design plan and wait for my OK before building, and share screenshots in both themes when done.
 
 ## 13. Security checklist
 

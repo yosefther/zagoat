@@ -36,6 +36,14 @@ class ProblemSummary(BaseModel):
     est_minutes: int
     access: Literal["free", "paid"]
     progress: str | None = None
+    best_result: "BestResult | None" = None
+
+
+class BestResult(BaseModel):
+    """The user's best Submit: the first metric's best value, else the most tests passed."""
+
+    value: float  # for sorting: the metric value, or the share of tests passed
+    label: str  # for display, e.g. "0.96" or "16/16 tests"
 
 
 class ProgressOut(BaseModel):
@@ -58,6 +66,7 @@ class UsageOut(BaseModel):
 class ProblemDetail(ProblemSummary):
     version: int
     statement: str
+    sample_tests: dict[str, str]
     metrics: list[dict[str, Any]]
     hint_count: int
     has_walkthrough: bool
@@ -153,18 +162,61 @@ def get_published(db: Session, problem_id: str) -> Problem:
     return problem
 
 
+def best_results(db: Session, user_id: Any, problems: dict[str, Problem]) -> dict[str, BestResult]:
+    """Best graded Submit per problem. system_error Submits don't count."""
+    rows = db.scalars(
+        select(Submission).where(
+            Submission.user_id == user_id,
+            Submission.kind == "submit",
+            Submission.status == "done",
+            Submission.verdict != "system_error",
+        )
+    ).all()
+    best: dict[str, BestResult] = {}
+    for row in rows:
+        problem = problems.get(row.problem_id)
+        if problem is None:
+            continue
+        result = _result_of(row, problem)
+        if result is None:
+            continue
+        current = best.get(row.problem_id)
+        lower_is_better = bool(problem.metrics) and problem.metrics[0].get("goal") == "at_most"
+        if current is None or (
+            result.value < current.value if lower_is_better else result.value > current.value
+        ):
+            best[row.problem_id] = result
+    return best
+
+
+def _result_of(row: Submission, problem: Problem) -> BestResult | None:
+    if problem.metrics:
+        name = problem.metrics[0]["name"]
+        value = next((m.get("value") for m in row.metrics or [] if m.get("name") == name), None)
+        return None if value is None else BestResult(value=value, label=f"{value:.2f}")
+    if row.tests_total:
+        passed = row.tests_passed or 0
+        return BestResult(value=passed / row.tests_total, label=f"{passed}/{row.tests_total} tests")
+    return None
+
+
 @router.get("", response_model=list[ProblemSummary])
 def list_problems(db: DbSession, auth: OptionalAuth) -> list[ProblemSummary]:
     problems = db.scalars(select(Problem).where(Problem.published.is_(True))).all()
     progress: dict[str, Progress] = {}
+    best: dict[str, BestResult] = {}
     if auth:
         rows = db.scalars(select(Progress).where(Progress.user_id == auth.user.id)).all()
         progress = {row.problem_id: row for row in rows}
+        best = best_results(db, auth.user.id, {p.id: p for p in problems})
     ordered = sorted(
         problems,
         key=lambda p: (CATEGORY_ORDER.get(p.category, 9), DIFFICULTY_ORDER[p.difficulty], p.title),
     )
-    return [summary_of(p, progress.get(p.id)) for p in ordered]
+    return [
+        summary_of(p, progress.get(p.id)).model_copy(update={"best_result": best.get(p.id)})
+        for p in ordered
+    ]
 
 
 @router.get("/{problem_id}", response_model=ProblemDetail)
@@ -186,6 +238,7 @@ def get_problem(
         **summary_of(problem, progress).model_dump(),
         version=problem.version,
         statement=problem.statement,
+        sample_tests=problem.sample_tests,
         metrics=problem.metrics,
         hint_count=len(problem.hints),
         has_walkthrough=problem.walkthrough is not None,

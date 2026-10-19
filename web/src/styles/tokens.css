@@ -1,0 +1,116 @@
+/*
+ * zagoat design tokens. Every color, font, size, radius, shadow and spacing step lives here.
+ * Components use these through Tailwind (see globals.css) and never use raw hex values.
+ *
+ * Colors come from the logo (web/public/brand/logo.png), sampled with Pillow:
+ *   logo body   #96D927  -> --brand
+ *   logo facets #C6EE83  -> --brand-soft
+ * Neutrals are tinted toward the logo's yellow-green hue. Contrast is checked in
+ * docs/design.md. Dark is the default theme; [data-theme="light"] switches to light.
+ */
+
+:root,
+:root[data-theme="dark"] {
+  --page: #0f120b;
+  --panel: #161b10;
+  --raised: #20271a;
+  --line: #333d27;
+  --field: #66755a;
+  --ink: #e8eddf;
+  --muted: #a3ad93;
+
+  --brand: #96d927;
+  --brand-strong: #b4e86a;
+  --brand-soft: #c6ee83;
+  --on-brand: #10140a;
+
+  --success: #3dd6c0;
+  --warning: #f2b84b;
+  --danger: #ff6b6b;
+
+  --easy: #6cb8ff;
+  --medium: #c3a6ff;
+  --hard: #ff7ac6;
+
+  --focus: #b4e86a;
+  --shadow-raised: 0 8px 24px rgb(0 0 0 / 0.35);
+
+  /* Monaco syntax colors (the editor theme is built from these at runtime). */
+  --code-keyword: #b4e86a;
+  --code-string: #e7cf8a;
+  --code-number: #c3a6ff;
+  --code-comment: #7d8870;
+  --code-function: #6cb8ff;
+  --code-selection: #2c3622;
+
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --page: #f6f8f0;
+  --panel: #ffffff;
+  --raised: #eef2e4;
+  --line: #d5dcc6;
+  --field: #8a957a;
+  --ink: #1a2010;
+  --muted: #575f48;
+
+  --brand: #96d927;
+  --brand-strong: #3d6a06;
+  --brand-soft: #c6ee83;
+  --on-brand: #10140a;
+
+  --success: #0b7a6b;
+  --warning: #8a5a00;
+  --danger: #c02929;
+
+  --easy: #1d6bbe;
+  --medium: #6b43c6;
+  --hard: #ad2277;
+
+  --focus: #3d6a06;
+  --shadow-raised: 0 8px 24px rgb(26 32 16 / 0.12);
+
+  --code-keyword: #3d6a06;
+  --code-string: #8a5a00;
+  --code-number: #6b43c6;
+  --code-comment: #6b7461;
+  --code-function: #1d6bbe;
+  --code-selection: #dfe8cc;
+
+  color-scheme: light;
+}
+
+:root {
+  /* Type: Bricolage Grotesque for headings, IBM Plex Sans for UI, JetBrains Mono for code. */
+  --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Scale, ratio 1.25 on a 16px base. */
+  --step--2: 0.8125rem;
+  --step--1: 0.875rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.5625rem;
+  --step-3: 1.953rem;
+  --step-4: 2.441rem;
+  --step-5: 3.052rem;
+
+  /* One chamfered corner instead of a uniform radius: the facet from the low-poly logo. */
+  --facet: 9px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  --header-height: 3.5rem;
+  --measure: 72ch;
+}

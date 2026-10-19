@@ -1,18 +1,28 @@
-import { ACCESS_LABELS, CATEGORY_LABELS } from "@/lib/labels";
+import { Difficulty, LockIcon } from "@/components/ProblemBits";
+import { CATEGORY_LABELS } from "@/lib/labels";
 import type { ProblemSummary } from "@/lib/types";
 
-export function ProblemMeta({ problem }: { problem: ProblemSummary }) {
+/** "RAG · Medium · 45 min", in sentence case, with difficulty in its color. */
+export function ProblemMeta({
+  problem,
+}: {
+  problem: Pick<ProblemSummary, "category" | "difficulty" | "est_minutes" | "access">;
+}) {
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium tracking-wide text-muted uppercase">
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
       <span>{CATEGORY_LABELS[problem.category] ?? problem.category}</span>
       <span aria-hidden="true">·</span>
-      <span>{problem.difficulty}</span>
+      <Difficulty level={problem.difficulty} />
       <span aria-hidden="true">·</span>
       <span>{problem.est_minutes} min</span>
       {problem.access === "paid" && (
-        <span className="rounded-full border border-field px-2 py-0.5 normal-case tracking-normal">
-          {ACCESS_LABELS.paid}
-        </span>
+        <>
+          <span aria-hidden="true">·</span>
+          <span className="inline-flex items-center gap-1">
+            <LockIcon label="" />
+            Lifetime and Pro
+          </span>
+        </>
       )}
     </p>
   );

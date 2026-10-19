@@ -2,9 +2,9 @@ import type { Job, MetricResult, TestResult } from "@/lib/types";
 import { VERDICT_LABELS, formatMetric, verdictTone } from "@/lib/verdicts";
 
 const TONE_CLASSES = {
-  success: "border-success text-success",
-  danger: "border-danger text-danger",
-  muted: "border-field text-muted",
+  success: "text-success",
+  danger: "text-danger",
+  muted: "text-muted",
 };
 
 const OUTCOME_ICONS: Record<TestResult["outcome"], string> = {
@@ -17,9 +17,13 @@ const OUTCOME_ICONS: Record<TestResult["outcome"], string> = {
 type Props = {
   job: Job | null;
   error: string | null;
+  emptyText?: string;
 };
 
-export function ResultsPanel({ job, error }: Props) {
+const DEFAULT_EMPTY =
+  "Run the sample tests as often as you like. Submit runs the hidden tests and metrics.";
+
+export function ResultsPanel({ job, error, emptyText = DEFAULT_EMPTY }: Props) {
   return (
     <section
       aria-label="Results"
@@ -32,9 +36,7 @@ export function ResultsPanel({ job, error }: Props) {
         </p>
       )}
       {!job && !error && (
-        <p className="text-muted">
-          Run the sample tests as often as you like. Submit runs the hidden tests and metrics.
-        </p>
+        <p className="text-muted">{emptyText}</p>
       )}
       {job && job.status !== "done" && (
         <p className="text-muted">
@@ -52,9 +54,7 @@ function Verdict({ job }: { job: Job }) {
   return (
     <>
       <div className="flex flex-wrap items-center gap-3">
-        <span
-          className={`rounded-full border px-2.5 py-0.5 font-display font-bold ${TONE_CLASSES[verdictTone(verdict)]}`}
-        >
+        <span className={`font-heading text-lg font-bold ${TONE_CLASSES[verdictTone(verdict)]}`}>
           {VERDICT_LABELS[verdict]}
         </span>
         <span className="text-muted">
@@ -96,7 +96,7 @@ function Verdict({ job }: { job: Job }) {
       {(job.stdout || job.stderr) && (
         <details open={verdict !== "passed"}>
           <summary className="cursor-pointer text-muted">Output</summary>
-          <pre className="mt-2 max-h-64 overflow-auto rounded-lg border border-border bg-code p-3 font-mono text-xs whitespace-pre-wrap">
+          <pre className="mt-2 max-h-64 overflow-auto rounded-md bg-raised p-3 font-mono text-xs whitespace-pre-wrap">
             {job.stdout}
             {job.stderr}
           </pre>
@@ -118,7 +118,7 @@ function Metrics({ metrics }: { metrics: MetricResult[] }) {
       </thead>
       <tbody>
         {metrics.map((metric) => (
-          <tr key={metric.name} className="border-t border-border">
+          <tr key={metric.name} className="border-t border-line">
             <td className="py-1 font-mono text-xs">{metric.name}</td>
             <td
               className={`py-1 ${metric.met === true ? "text-success" : metric.met === false ? "text-danger" : ""}`}

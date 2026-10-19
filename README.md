@@ -12,7 +12,9 @@ Milestone 9 (production) is next.
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
-design decisions are in [docs/design.md](docs/design.md). Sign-in works with GitHub, Google
+design follows the `zagoat-design` skill (`.claude/skills/zagoat-design/SKILL.md`); its
+decisions, palette and contrast measurements are in [docs/design.md](docs/design.md). All
+colors, fonts and sizes are tokens in `web/src/styles/tokens.css`. Sign-in works with GitHub, Google
 or (locally only) a dev user, and the account page covers profile, the code opt-in and
 self-service deletion. Problems sync from `problems/` into Postgres and show up at
 `/problems`, with two original development tasks (one RAG, one evals). Signed-in users with
@@ -36,7 +38,8 @@ sections 8 to 11 of the brief (summary below).
 
 - Docker with Compose v2
 - [uv](https://docs.astral.sh/uv/). It installs Python 3.12 for you.
-- Node.js 22 and npm
+- Node.js 22 and npm 10.5 or newer (a three.js dependency requires it). With an older npm,
+  run `npx npm@10 install` instead of `npm install`.
 
 ## Run it locally
 
@@ -254,6 +257,8 @@ arguments, which would let anyone who can write to Redis run code on the runner.
 
 ## Editor
 
+- The problem page has resizable panes (react-resizable-panels; sizes are saved per
+  browser) and shortcuts: Ctrl/Cmd+Enter runs, Ctrl/Cmd+Shift+Enter submits.
 - Monaco loads from jsDelivr at a pinned version (`monacoBaseUrl` in `web/src/config.ts`)
   instead of being bundled; bundling Monaco's web workers into Next.js is fiddly and the
   CDN keeps the app bundle small. A Content Security Policy must allow that origin.

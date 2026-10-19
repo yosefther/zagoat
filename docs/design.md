@@ -1,112 +1,77 @@
-# zagoat design plan
+# zagoat design
 
-Status: decided by Claude on 2026-10-21 under the "decide it, record it" instruction.
-Needs your review. Every value here lives in `web/src/app/globals.css`, so changes happen in one place.
+Approved by the owner on 2026-10-21. The rules for any UI work are in
+[`.claude/skills/zagoat-design/SKILL.md`](../.claude/skills/zagoat-design/SKILL.md); this file
+records the decisions made under them. Every value lives once in
+[`web/src/styles/tokens.css`](../web/src/styles/tokens.css).
 
-## Principles
+## Palette
 
-- Indigo carries the brand. Lime is a spark used sparingly: the primary button, focus rings
-  and success states. It's never used for large fills or body text.
-- The page should feel like a calm, well-typeset workbook, not a terminal. Off-white paper
-  in light mode and deep indigo, not black, in dark mode.
-- Text lines stay under 80 characters (`max-w-prose`, about 65ch).
+Sampled from `web/public/brand/logo.png` with Pillow (6-color quantize, transparent pixels
+ignored). The logo is one hue: a yellow-green body and lighter facets.
 
-## Colours
-
-| Token | Light | Dark | Use |
+| Token | Dark (default) | Light | Source |
 | --- | --- | --- | --- |
-| `--bg` | `#FAFAF7` | `#110F2B` | Page background |
-| `--surface` | `#FFFFFF` | `#1C1A40` | Cards, panels, editor chrome |
-| `--ink` | `#1E1B4B` | `#ECEBF7` | Body text and headings |
-| `--muted` | `#55527A` | `#ABA8CC` | Secondary text |
-| `--border` | `#DDDBEA` | `#34315E` | Decorative dividers |
-| `--field` | `#8B88AE` | `#6E6A9C` | Input borders (at least 3:1 against surface) |
-| `--accent` | `#A3E635` | `#A3E635` | Primary button fill, focus halo, success marks |
-| `--on-accent` | `#1E1B4B` | `#1E1B4B` | Text on lime (10.6:1) |
-| `--link` | `#4338CA` | `#A5B4FC` | Links |
-| `--success` | `#3F6212` | `#A3E635` | Success text |
-| `--danger` | `#B42318` | `#FDA29B` | Errors |
+| `--brand` | `#96D927` | `#96D927` (fills only) | Logo body |
+| `--brand-strong` (links, focus) | `#B4E86A` | `#3D6A06` | Logo body, lightened or darkened for contrast |
+| `--brand-soft` (highlights, 3D hero) | `#C6EE83` | `#C6EE83` | Logo facets and glow |
+| `--page` / `--panel` / `--raised` | `#0F120B` / `#161B10` / `#20271A` | `#F6F8F0` / `#FFFFFF` / `#EEF2E4` | Neutrals tinted toward the logo hue |
+| `--line` / `--field` | `#333D27` / `#66755A` | `#D5DCC6` / `#8A957A` | Same |
+| `--ink` / `--muted` | `#E8EDDF` / `#A3AD93` | `#1A2010` / `#575F48` | Same |
+| `--success` / `--warning` / `--danger` | `#3DD6C0` / `#F2B84B` / `#FF6B6B` | `#0B7A6B` / `#8A5A00` / `#C02929` | Teal, so success never reads as the brand |
+| `--easy` / `--medium` / `--hard` | `#6CB8FF` / `#C3A6FF` / `#FF7AC6` | `#1D6BBE` / `#6B43C6` / `#AD2277` | Magenta "hard", so it never reads as an error |
 
-Measured contrast: all text tokens are at least 6.3:1 on `--bg` and `--surface` in both modes.
-Lime on the light background is only 1.44:1, so the light-mode primary button has a 1px
-`--ink` border. Focus is a 2px `--ink` outline with a 2px lime halo in light mode, and a 2px
-lime outline in dark mode.
+Measured contrast: every text color is at least 4.5:1 on page, panel and raised surfaces in
+both themes (lowest: light success 4.6). Input borders are at least 2.9:1 in dark and 3.1:1
+in light. Text on brand fills is `#10140A` at 10.9:1. Light-theme focus rings use
+`--brand-strong`, because lime on off-white is only 1.6:1.
 
-Dark mode follows the system setting by default. A toggle in the footer can force light or dark,
-and the choice is saved in `localStorage`.
+The Monaco editor theme is built at runtime from these tokens (`--code-*` for syntax) and
+rebuilt when the theme changes.
 
 ## Type
 
-- **Space Grotesk** (500/700): the wordmark and headings. It's geometric and a little quirky,
-  which echoes the logo.
-- **IBM Plex Sans** (400/500/600) for body text and UI, and **IBM Plex Mono** (400/500) for code
-  and the editor. One superfamily keeps prose and code in step.
+- Bricolage Grotesque (500, 700): headings and the hero.
+- IBM Plex Sans (400, 500, 600): body and UI.
+- JetBrains Mono (400, 500): code only (dotted zero, distinct 1/l/I). Ligatures are off.
+- Scale, ratio 1.25 on 16px: 13 / 14 / 16 / 20 / 25 / 31 / 39 / 49.
 
-Scale (ratio 1.25, base 16px): 13 / 14 / 16 / 20 / 25 / 31 / 39 / 49. Body text is 16/1.6,
-headings 1.15–1.25. Sentence case everywhere.
+## Principles
 
-## Logo
+1. Lime is a signal, not a surface: primary actions, focus, links and passing results only.
+2. Facets, not pills: primary buttons have one chamfered corner (`--facet`), echoing the
+   low-poly goat.
+3. The braces carry the brand: the `{ }` from the goat's horns appears in the 3D hero only.
+4. Dense and quiet in the app; the 3D hero is the landing page's one bold element.
+5. Status is color plus a word or icon, never color alone.
 
-There's no clean vector logo yet. The PNG at the repo root has a raster glow with colour
-fringing, so it isn't used. Per the brief, the header uses a text wordmark ("zagoat" in Space
-Grotesk 700, with lime `{ }` brace marks around the "goat" part as a nod to the horns). Dropping
-SVGs into `web/public/brand/` (`mark.svg`, `wordmark.svg`) replaces it.
+## Pages
 
-## Landing page (`/`)
+- Landing: headline and calls to action on the left, the 3D hero on the right; then the real
+  sample tasks, pricing and the waitlist form.
+- Problem list: a sortable table (status, title, category, difficulty, time, best result)
+  with category, difficulty and status filters, search and a random task button.
+- Problem page: its own top bar (navigation, timer, Submits left, Run tests, Submit
+  solution, shortcuts, theme, account) over resizable panes: Description / Hints /
+  Walkthrough / Submissions on the left; file tabs and the editor over a Sample tests /
+  Results console on the right. Pane sizes are saved per browser. On phones the page shows
+  the statement only.
+- Shortcuts: Ctrl/Cmd+Enter runs, Ctrl/Cmd+Shift+Enter submits; listed in the "?" menu.
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│ zagoat            Problems  Pricing             [ Sign in ]  │
-├──────────────────────────────────────────────────────────────┤
-│  Practice the real tasks                                     │
-│  AI interviews give you.                                     │
-│  Fix a RAG pipeline, debug a training loop, write an eval.   │
-│  30–60 minute tasks, graded by hidden tests and metrics.     │
-│                                                              │
-│  [ you@example.com        ] [ Join the waitlist ]            │
-│  [x] Email me when zagoat launches. Privacy policy.          │
-├──────────────────────────────────────────────────────────────┤
-│  What you'll practice                                        │
-│  ┌───────────────┐ ┌───────────────┐ ┌───────────────┐       │
-│  │ RAG · medium  │ │ Evals · easy  │ │ Training · hard│      │
-│  │ Title         │ │ Title         │ │ Title          │      │
-│  │ two-line brief│ │ ...           │ │ ...            │      │
-│  │ code excerpt  │ │ code excerpt  │ │ code excerpt   │      │
-│  └───────────────┘ └───────────────┘ └───────────────┘       │
-├──────────────────────────────────────────────────────────────┤
-│  How it works: 1 Read the brief  2 Fix the code  3 Get graded │
-│  See pricing →                                               │
-├──────────────────────────────────────────────────────────────┤
-│ © zagoat · Privacy · Terms                      Theme: Auto  │
-└──────────────────────────────────────────────────────────────┘
-```
+## 3D hero
 
-On mobile, the columns stack, and the waitlist input and button go full width.
+`web/src/components/hero/`. Low-poly polyhedra, a torus and two extruded braces, lit in the
+logo's colors, drifting and leaning toward the cursor. three.js through React Three Fiber
+and drei, loaded dynamically with server rendering off. The device pixel ratio is capped at
+1.5, and rendering pauses when the hero is off-screen or the tab is hidden.
 
-## Problem page (`/problems/[id]`, desktop)
+`web/public/brand/hero-static-{dark,light}.png` are renders of the same scene. They show
+first, and stay for reduced motion, missing WebGL and screens under 768px. Re-render them
+after changing the scene: set the theme, load `/` in a WebGL browser, make the page
+background transparent, and screenshot the `[data-hero-mode=live]` element at 1.5x with a
+transparent background (Playwright's `omit_background` works).
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│ zagoat   Problems  History  Pricing               avatar ▾  │
-├──────────────────────┬───────────────────────────────────────┤
-│ RAG · medium · 45 min│ [main.py] [retriever.py]   ⏱ Timer ○  │
-│ Title                │                                       │
-│ Statement (markdown) │          Monaco editor                │
-│ ...                  │                                       │
-│ Hints (1 of 3) [Show]│                                       │
-│ Walkthrough · Ref.   ├───────────────────────────────────────┤
-│                      │ Results: verdict, tests, metrics      │
-│                      │ 7 of 10 submits left · resets 02:00   │
-│                      │        [ Run tests ] [Submit solution]│
-└──────────────────────┴───────────────────────────────────────┘
-```
+## Brand files
 
-Below 1024px, the page shows the statement and a note: "Solving works on desktop. Open this
-page on a larger screen to write and run code."
-
-## Motion and accessibility
-
-- Transitions are 150ms colour and opacity changes only, and are disabled under
-  `prefers-reduced-motion`.
-- Every interactive element has a visible focus state. A skip link goes to the main content.
-- Form errors are announced with `aria-live` and linked to their field with `aria-describedby`.
+`web/public/brand/logo.png` is the owner's logo, used as-is. `logo-128.png` and
+`favicon-{16,32,180,512}.png` are plain resizes of it.

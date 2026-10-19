@@ -1,119 +1,82 @@
 @import "tailwindcss";
+@import "../styles/tokens.css";
 
-/*
- * Design tokens. See docs/design.md for the reasoning and measured contrast.
- * Light is the default; dark follows the system unless the user picks a theme,
- * which sets data-theme on <html>.
- */
-:root {
-  --bg: #fafaf7;
-  --surface: #ffffff;
-  --ink: #1e1b4b;
-  --muted: #55527a;
-  --border: #dddbea;
-  --field: #8b88ae;
-  --accent: #a3e635;
-  --on-accent: #1e1b4b;
-  --accent-edge: #1e1b4b;
-  --link: #4338ca;
-  --success: #3f6212;
-  --danger: #b42318;
-  --code-bg: #f1f0f8;
-  --focus-outline: #1e1b4b;
-  --focus-halo: #a3e635;
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #110f2b;
-    --surface: #1c1a40;
-    --ink: #ecebf7;
-    --muted: #aba8cc;
-    --border: #34315e;
-    --field: #6e6a9c;
-    --accent-edge: #a3e635;
-    --link: #a5b4fc;
-    --success: #a3e635;
-    --danger: #fda29b;
-    --code-bg: #24214d;
-    --focus-outline: #a3e635;
-    --focus-halo: transparent;
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme="dark"] {
-  --bg: #110f2b;
-  --surface: #1c1a40;
-  --ink: #ecebf7;
-  --muted: #aba8cc;
-  --border: #34315e;
-  --field: #6e6a9c;
-  --accent-edge: #a3e635;
-  --link: #a5b4fc;
-  --success: #a3e635;
-  --danger: #fda29b;
-  --code-bg: #24214d;
-  --focus-outline: #a3e635;
-  --focus-halo: transparent;
-  color-scheme: dark;
-}
+/* `light:` styles apply when the light theme is on (dark is the default). */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-surface: var(--surface);
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-field: var(--field);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-border: var(--border);
-  --color-field: var(--field);
-  --color-accent: var(--accent);
-  --color-on-accent: var(--on-accent);
-  --color-accent-edge: var(--accent-edge);
-  --color-link: var(--link);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-on-brand: var(--on-brand);
   --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-danger: var(--danger);
-  --color-code: var(--code-bg);
-  --font-display: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
-  /* Type scale, ratio 1.25 on a 16px base. */
-  --text-xs: 0.8125rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: 1.953rem;
-  --text-3xl: 2.441rem;
-  --text-4xl: 3.052rem;
+  --color-easy: var(--easy);
+  --color-medium: var(--medium);
+  --color-hard: var(--hard);
+
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-code);
+
+  --text-xs: var(--step--2);
+  --text-sm: var(--step--1);
+  --text-base: var(--step-0);
+  --text-lg: var(--step-1);
+  --text-xl: var(--step-2);
+  --text-2xl: var(--step-3);
+  --text-3xl: var(--step-4);
+  --text-4xl: var(--step-5);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --shadow-raised: var(--shadow-raised);
 }
 
-/* Base element styles live in the base layer so utilities can override them. */
 @layer base {
   body {
-    background: var(--bg);
+    background: var(--page);
     color: var(--ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     line-height: 1.6;
   }
 
   h1,
   h2,
   h3 {
-    font-family: var(--font-display);
-    line-height: 1.2;
+    font-family: var(--font-heading);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
 
   a {
-    color: var(--link);
+    color: var(--brand-strong);
     text-underline-offset: 0.2em;
   }
 
   :focus-visible {
-    outline: 2px solid var(--focus-outline);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
-    box-shadow: 0 0 0 2px var(--focus-halo);
+  }
+
+  /* Code shows exactly what's typed: no "->" turning into an arrow glyph. */
+  code,
+  pre,
+  kbd {
+    font-variant-ligatures: none;
+  }
+
+  ::selection {
+    background: var(--code-selection);
   }
 }
 
@@ -128,37 +91,51 @@
   }
 }
 
+/* A facet: the top-right corner is cut at 45°, echoing the low-poly goat. */
+@utility facet {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--facet)) 0,
+    100% var(--facet),
+    100% 100%,
+    0 100%
+  );
+}
+
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-medium
-    no-underline transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium whitespace-nowrap no-underline
+    transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-55;
 }
 
 @utility btn-primary {
-  @apply btn border border-accent-edge bg-accent text-on-accent hover:brightness-95;
+  @apply btn facet bg-brand text-on-brand hover:bg-brand-soft;
 }
 
 @utility btn-secondary {
-  @apply btn border border-field bg-surface text-ink hover:bg-code;
+  @apply btn rounded-md border border-field bg-raised text-ink hover:border-ink;
+}
+
+@utility btn-quiet {
+  @apply btn rounded-md text-muted hover:bg-raised hover:text-ink;
 }
 
 @utility field {
-  @apply w-full rounded-lg border border-field bg-surface px-3 py-2.5 text-ink placeholder:text-muted;
+  @apply w-full rounded-md border border-field bg-panel px-3 py-2 text-ink placeholder:text-muted;
 }
 
-@utility card {
-  @apply rounded-xl border border-border bg-surface;
+@utility panel {
+  @apply rounded-md bg-panel;
 }
 
 @utility container-page {
   @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
 }
 
-/* Long-form text: privacy, terms, statements. */
 @utility prose-page {
-  @apply flex max-w-prose flex-col gap-4;
+  @apply flex max-w-[var(--measure)] flex-col gap-4;
 
   & h2 {
-    @apply mt-6 text-xl font-bold;
+    @apply mt-6 text-lg font-bold;
   }
   & ul {
     @apply list-disc pl-6;
@@ -170,13 +147,13 @@
   @apply flex flex-col gap-4 leading-relaxed;
 
   & h1 {
-    @apply text-2xl font-bold;
+    @apply text-xl font-bold;
   }
   & h2 {
-    @apply mt-4 text-xl font-bold;
+    @apply mt-4 text-lg font-bold;
   }
   & h3 {
-    @apply mt-2 text-lg font-bold;
+    @apply mt-2 text-base font-bold;
   }
   & ul {
     @apply list-disc pl-6;
@@ -188,10 +165,10 @@
     @apply mt-1;
   }
   & code {
-    @apply rounded bg-code px-1 py-0.5 font-mono text-[0.9em];
+    @apply rounded-sm bg-raised px-1 py-0.5 font-mono text-[0.88em];
   }
   & pre {
-    @apply overflow-x-auto rounded-lg border border-border bg-code p-3 text-sm;
+    @apply overflow-x-auto rounded-md bg-raised p-3 text-sm;
   }
   & pre code {
     @apply bg-transparent p-0;
@@ -201,9 +178,9 @@
   }
   & th,
   & td {
-    @apply border border-border px-2 py-1.5 text-left align-top;
+    @apply border-b border-line px-2 py-1.5 text-left align-top;
   }
   & th {
-    @apply bg-code font-semibold;
+    @apply font-semibold text-muted;
   }
 }
