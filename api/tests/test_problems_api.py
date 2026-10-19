@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from tests.conftest import sign_in
+from tests.conftest import finish_job, sign_in, start_job
 from tests.problem_factory import add_problem
 
 
@@ -73,3 +73,40 @@ def test_unknown_problem_is_404(client: TestClient) -> None:
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "problem_not_found"
+
+
+def test_sample_tests_are_public(client: TestClient, db: Session) -> None:
+    add_problem(db, "free-01")
+
+    body = client.get("/problems/free-01").json()
+
+    assert body["sample_tests"] == {"test_sample.py": "def test_x():\n    pass\n"}
+
+
+def test_list_shows_best_result_per_problem(
+    client: TestClient, worker: TestClient, db: Session
+) -> None:
+    add_problem(db, "free-01")  # has a "score" metric
+    no_metric = add_problem(db, "free-02")
+    no_metric.metrics = []
+    db.commit()
+    sign_in(client, db)
+    for value in (0.5, 0.9, 0.7):
+        job = start_job(client, "free-01").json()["job_id"]
+        finish_job(worker, job, "failed", metrics=[{"name": "score", "value": value}])
+    for passed in (3, 1):
+        job = start_job(client, "free-02").json()["job_id"]
+        finish_job(worker, job, "failed", tests_passed=passed, tests_total=4)
+    job = start_job(client, "free-02").json()["job_id"]
+    finish_job(worker, job, "system_error", tests_passed=4, tests_total=4)
+
+    best = {p["id"]: p["best_result"] for p in client.get("/problems").json()}
+
+    assert best["free-01"] == {"value": 0.9, "label": "0.90"}
+    assert best["free-02"] == {"value": 0.75, "label": "3/4 tests"}
+
+
+def test_visitors_get_no_best_result(client: TestClient, db: Session) -> None:
+    add_problem(db, "free-01")
+
+    assert client.get("/problems").json()[0]["best_result"] is None

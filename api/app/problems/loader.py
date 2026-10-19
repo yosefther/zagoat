@@ -1,7 +1,7 @@
 """Read a task folder into the parts the API may store and show.
 
 Hidden tests, graders and mock-LLM fixtures are never read here: they ship only to the
-runner (brief, section 5).
+runner (brief, section 5). Sample tests are public.
 """
 
 import hashlib
@@ -32,6 +32,7 @@ class PublicProblem:
     hints: list[str]
     walkthrough: str | None
     reference_files: dict[str, str]
+    sample_tests: dict[str, str]
 
 
 def _read_text(path: Path) -> str:
@@ -133,6 +134,7 @@ def load_problem(root: Path) -> PublicProblem:
         hints=hints,
         walkthrough=optional_text(files.walkthrough),
         reference_files=reference,
+        sample_tests=_read_code_dir(root, spec.grader.sample_tests),
     )
 
 

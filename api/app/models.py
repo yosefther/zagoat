@@ -94,6 +94,8 @@ class Problem(Base):
     hints: Mapped[list[str]] = mapped_column(JSONB)
     walkthrough: Mapped[str | None] = mapped_column(Text)
     reference_files: Mapped[dict[str, str]] = mapped_column(JSONB)
+    # Sample tests are public: Run shows their output anyway, and the statement lists them.
+    sample_tests: Mapped[dict[str, str]] = mapped_column(JSONB, server_default="{}")
     # Metric names and thresholds, shown next to results. Not secret.
     metrics: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
     updated_at: Mapped[datetime] = mapped_column(

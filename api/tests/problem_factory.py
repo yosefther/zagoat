@@ -67,6 +67,7 @@ def add_problem(db: Session, problem_id: str = "test-task-01", access: str = "fr
         hints=["Look at the loop.", "Check the bounds."],
         walkthrough="Full solution.",
         reference_files={"main.py": "def add(a, b):\n    return a + b\n"},
+        sample_tests={"test_sample.py": "def test_x():\n    pass\n"},
         metrics=[{"name": "score", "threshold": 0.8, "goal": "at_least"}],
     )
     db.add(problem)
