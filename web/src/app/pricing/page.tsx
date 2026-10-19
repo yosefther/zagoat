@@ -1,28 +1,64 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-export const metadata: Metadata = { title: "Pricing" };
+import { PricingPlans } from "@/app/pricing/PricingPlans";
 
-// Static until billing lands (Milestone 8), when prices come from the API's config.
+export const metadata: Metadata = {
+  title: "Pricing",
+  description: "Practice free, or unlock every task, hint and walkthrough.",
+};
+
+const CAPABILITIES: [string, string, string][] = [
+  ["Browse problems and read statements", "Yes", "Yes"],
+  ["Editor, Run and Submit on free problems", "Yes", "Yes"],
+  ["Editor, Run and Submit on paid problems", "No", "Yes"],
+  ["Hints", "On free problems", "Yes"],
+  ["Walkthroughs", "No", "Yes"],
+  ["Reference solution", "After your first Submit", "After your first Submit"],
+  ["Submits per day", "10", "100 (fair use)"],
+  ["Test runs per hour", "30", "120"],
+];
+
 export default function PricingPage() {
   return (
-    <main className="container-page flex flex-col gap-8 py-16">
-      <h1 className="text-3xl font-bold">Pricing</h1>
-      <p className="max-w-prose text-muted">
-        zagoat is in development. Join the waitlist on the home page to hear when it opens.
-      </p>
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="card flex flex-col gap-2 p-6">
-          <h2 className="text-xl font-bold">Free</h2>
-          <p className="text-muted">A few free tasks with the editor, tests and hints.</p>
-        </section>
-        <section className="card flex flex-col gap-2 p-6">
-          <h2 className="text-xl font-bold">Lifetime</h2>
-          <p className="text-muted">
-            One payment for every task, hint and walkthrough. Limited to the first 100 buyers.
-            Price announced at launch.
-          </p>
-        </section>
+    <main className="container-page flex flex-col gap-10 py-16">
+      <div className="flex flex-col gap-3">
+        <h1 className="text-3xl font-bold">Pricing</h1>
+        <p className="max-w-prose text-muted">
+          Start free. Upgrade when you want every task, every hint and the full walkthroughs.
+        </p>
       </div>
+      <Suspense fallback={<p className="text-muted">Loading plans…</p>}>
+        <PricingPlans />
+      </Suspense>
+      <section aria-labelledby="compare-heading" className="flex flex-col gap-4">
+        <h2 id="compare-heading" className="text-xl font-bold">
+          What each plan includes
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[32rem] border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="py-2 pr-4 font-medium text-muted">Capability</th>
+                <th className="py-2 pr-4 font-medium">Free</th>
+                <th className="py-2 font-medium">Lifetime and Pro</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CAPABILITIES.map(([name, free, paid]) => (
+                <tr key={name} className="border-b border-border">
+                  <td className="py-2 pr-4">{name}</td>
+                  <td className="py-2 pr-4 text-muted">{free}</td>
+                  <td className="py-2">{paid}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-sm text-muted">
+          Lifetime and Pro unlock exactly the same things; they differ only in how you pay.
+        </p>
+      </section>
     </main>
   );
 }

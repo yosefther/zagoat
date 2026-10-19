@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import Settings, get_settings
 from app.errors import install_error_handlers
 from app.monitoring import init_sentry
-from app.routes import auth, csrf, health, jobs, me, problems, waitlist
+from app.routes import auth, billing, csrf, fake_billing, health, jobs, me, problems, waitlist
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -34,6 +34,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(problems.router)
     app.include_router(jobs.router)
     app.include_router(jobs.internal)
+    app.include_router(billing.router)
+    if settings.payment_provider == "fake" and not settings.is_production:
+        app.include_router(fake_billing.router)
     return app
 
 

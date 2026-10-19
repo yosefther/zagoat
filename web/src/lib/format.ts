@@ -26,3 +26,11 @@ export const PLAN_LABELS = {
   pro_monthly: "Pro (monthly)",
   pro_yearly: "Pro (yearly)",
 } as const;
+
+export function formatPrice(cents: number, currency: string): string {
+  return new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+  }).format(cents / 100);
+}

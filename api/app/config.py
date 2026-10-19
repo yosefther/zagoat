@@ -7,7 +7,7 @@ infra/docker-compose.yml; production must set every required value explicitly.
 
 from enum import StrEnum
 from functools import lru_cache
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -103,6 +103,19 @@ class Settings(BaseSettings):
     # A Pro subscription whose payment failed keeps access this long (section 10, proposed).
     past_due_grace_days: int = 7
 
+    # Billing (section 10). The provider isn't chosen yet; "fake" works locally and in tests.
+    # With no provider, billing routes answer "not available yet".
+    payment_provider: Literal["fake"] | None = "fake"
+    payment_webhook_secret: str = "dev-only-webhook-secret"  # noqa: S105
+    currency: str = "USD"
+    # Lifetime: unset price means it isn't on sale. Only the first `lifetime_cap` are offered.
+    lifetime_price_cents: int | None = None
+    lifetime_cap: int = 100
+    # Pro stays off until the library reaches about 20 problems (section 8).
+    pro_subscriptions_enabled: bool = False
+    pro_monthly_price_cents: int = 1500
+    pro_yearly_price_cents: int = 9900
+
     # Sign-in and waitlist attempts per IP (section 9, proposed).
     ip_attempts_per_hour: int = 5
 
@@ -121,6 +134,8 @@ class Settings(BaseSettings):
                 raise ValueError("Production requires COOKIE_SECURE=true")
             if self.dev_login_enabled:
                 raise ValueError("DEV_LOGIN_ENABLED must be false in production")
+            if self.payment_provider == "fake":
+                raise ValueError("PAYMENT_PROVIDER=fake is for development; leave it empty")
         return self
 
     @property

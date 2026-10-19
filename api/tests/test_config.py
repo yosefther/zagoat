@@ -15,6 +15,7 @@ PRODUCTION: dict[str, Any] = {
     "cookie_secure": True,
     "worker_secret": "a-long-worker-secret",
     "worker_allowed_ips": ("198.51.100.7",),
+    "payment_provider": None,
 }
 
 
@@ -42,6 +43,11 @@ def test_production_accepts_explicit_values() -> None:
 def test_production_requires_secure_cookies() -> None:
     with pytest.raises(ValidationError, match="COOKIE_SECURE"):
         production(cookie_secure=False)
+
+
+def test_production_refuses_the_fake_payment_provider() -> None:
+    with pytest.raises(ValidationError, match="PAYMENT_PROVIDER=fake"):
+        production(payment_provider="fake")
 
 
 def test_production_refuses_dev_login() -> None:
