@@ -7,7 +7,8 @@ The build brief in [CLAUDE.md](CLAUDE.md) is the source of truth for scope, rule
 ## Status
 
 Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts), 4
-(problems), 5 (editor and drafts), 6 (runner) and 7 (business rules).
+(problems), 5 (editor and drafts), 6 (runner), 7 (business rules) and 8 (billing).
+Milestone 9 (production) is next.
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
 (marked as drafts to review before launch), a static pricing page and a 404 page. The
@@ -206,8 +207,31 @@ in `api/app/config.py`.
 | After a downgrade, drafts, history and solved states stay; paid problems become read only | `api/app/routes/problems.py` |
 | The timer only records time to Submit (stored on the submission and progress) | `api/app/routes/jobs.py` |
 
-`GET /submissions` (all problems) and `PATCH /me` (code opt-in) are small additions to
-the route list in the brief.
+`GET /submissions` (all problems), `PATCH /me` (code opt-in), `GET /csrf`,
+`GET /auth/providers`, `GET /billing/plans` and `POST /internal/jobs/{id}/started` are small
+additions to the route list in the brief.
+
+## Billing
+
+- `api/app/billing/provider.py` defines `PaymentProvider` (`create_checkout`, `portal_url`,
+  `verify_webhook`, `parse_event`, `fetch_subscription`). The real provider isn't chosen
+  yet; adding it means one adapter class plus a branch in `app/billing/registry.py`.
+- `FakeProvider` keeps its state in Redis. Locally, checkout and the billing portal are
+  small pages served by the API (`/billing/fake/...`, never registered in production) that
+  change the subscription and deliver signed webhooks, so every state in section 10 can be
+  clicked through: renewal, failed payment, cancel, resume, end and refund.
+- `POST /webhooks/payments` verifies the signature, records the event id and applies the
+  provider's *current* subscription state in one transaction. Repeats are acknowledged and
+  skipped; invalid requests get 400; transient failures get 503 so the provider retries.
+- Lifetime is off sale until `LIFETIME_PRICE_CENTS` is set and stops being offered after
+  `LIFETIME_CAP` (100) sales; a sale that lands after that is still honored. Pro is hidden
+  until `PRO_SUBSCRIPTIONS_ENABLED=true`.
+- Nightly: `uv run python -m app.billing reconcile` re-fetches every live subscription,
+  fixes drift and marks lapsed ones `expired` (scheduling comes with Milestone 9).
+- A user with a renewing Pro subscription must cancel it before deleting their account.
+
+To try paid features locally, set `LIFETIME_PRICE_CENTS=14900` in `api/.env`, restart the
+API, and buy Lifetime from `/pricing` with the "Pay (test)" button.
 
 ## How a Run or Submit works
 
