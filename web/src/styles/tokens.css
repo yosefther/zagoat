@@ -2,105 +2,116 @@
  * zagoat design tokens. Every color, font, size, radius, shadow and spacing step lives here.
  * Components use these through Tailwind (see globals.css) and never use raw hex values.
  *
- * Colors come from the logo (web/public/brand/logo.png), sampled with Pillow:
- *   logo body   #96D927  -> --brand
- *   logo facets #C6EE83  -> --brand-soft
- * Neutrals are tinted toward the logo's yellow-green hue. Contrast is checked in
- * docs/design.md. Dark is the default theme; [data-theme="light"] switches to light.
+ * Direction (docs/design.md): alpine dusk. The page is a blue-violet evening sky, roughly
+ * the complement of the logo's lime, so the goat pops instead of blending into green-black.
+ *   logo body   #96D927 -> --brand (actions, focus, the trail, passed results)
+ *   logo facets #C6EE83 -> --brand-soft (highlights in the 3D hero)
+ * Contrast is checked in docs/design.md. Dark is the default; [data-theme="light"] is light.
  */
 
 :root,
 :root[data-theme="dark"] {
-  --page: #0f120b;
-  --panel: #161b10;
-  --raised: #20271a;
-  --line: #333d27;
-  --field: #66755a;
-  --ink: #e8eddf;
-  --muted: #a3ad93;
+  --page: #1b1e33; /* dusk */
+  --panel: #232742; /* ridge */
+  --raised: #2e3353; /* scree */
+  --line: #3d4366;
+  --field: #7a80a6;
+  --ink: #f1f3ec; /* snow */
+  --muted: #a6abc4; /* haze */
 
   --brand: #96d927;
   --brand-strong: #b4e86a;
   --brand-soft: #c6ee83;
-  --on-brand: #10140a;
+  --on-brand: #1b1e33;
 
-  --success: #3dd6c0;
-  --warning: #f2b84b;
-  --danger: #ff6b6b;
+  --success: #4fd8b0;
+  --warning: #f7c35c;
+  --danger: #ff7d7d;
 
-  --easy: #6cb8ff;
-  --medium: #c3a6ff;
-  --hard: #ff7ac6;
+  --easy: #7fd3ff; /* glacier */
+  --medium: #e0a8ff; /* lavender */
+  --hard: #ff7ea6; /* rose */
 
   --focus: #b4e86a;
-  --shadow-raised: 0 8px 24px rgb(0 0 0 / 0.35);
+  --shadow-raised: 0 12px 32px rgb(8 10 24 / 0.45);
+
+  /* The 3D hero: rock from valley to ridge, snow on the peaks. */
+  --rock-low: #2b2f50;
+  --rock-high: #5a6194;
+  --snow: #e8ecf4;
 
   /* Monaco syntax colors (the editor theme is built from these at runtime). */
   --code-keyword: #b4e86a;
-  --code-string: #e7cf8a;
-  --code-number: #c3a6ff;
-  --code-comment: #7d8870;
-  --code-function: #6cb8ff;
-  --code-selection: #2c3622;
+  --code-string: #f2d58a;
+  --code-number: #e0a8ff;
+  --code-comment: #9aa0c2;
+  --code-function: #7fd3ff;
+  --code-selection: #3a4070;
 
   color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  --page: #f6f8f0;
+  --page: #f2f4f8;
   --panel: #ffffff;
-  --raised: #eef2e4;
-  --line: #d5dcc6;
-  --field: #8a957a;
-  --ink: #1a2010;
-  --muted: #575f48;
+  --raised: #e6e9f1;
+  --line: #d3d8e6;
+  --field: #7e84a3;
+  --ink: #1b1e33;
+  --muted: #555b78;
 
   --brand: #96d927;
-  --brand-strong: #3d6a06;
+  --brand-strong: #3e6c08;
   --brand-soft: #c6ee83;
-  --on-brand: #10140a;
+  --on-brand: #1b1e33;
 
-  --success: #0b7a6b;
+  --success: #0a6e58;
   --warning: #8a5a00;
-  --danger: #c02929;
+  --danger: #b8282e;
 
-  --easy: #1d6bbe;
-  --medium: #6b43c6;
-  --hard: #ad2277;
+  --easy: #1767b0;
+  --medium: #7a3fc2;
+  --hard: #b02060;
 
-  --focus: #3d6a06;
-  --shadow-raised: 0 8px 24px rgb(26 32 16 / 0.12);
+  --focus: #3e6c08;
+  --shadow-raised: 0 12px 32px rgb(27 30 51 / 0.14);
 
-  --code-keyword: #3d6a06;
+  --rock-low: #c3c9dd;
+  --rock-high: #8c93b4;
+  --snow: #ffffff;
+
+  --code-keyword: #3e6c08;
   --code-string: #8a5a00;
-  --code-number: #6b43c6;
-  --code-comment: #6b7461;
-  --code-function: #1d6bbe;
-  --code-selection: #dfe8cc;
+  --code-number: #7a3fc2;
+  --code-comment: #5e6482;
+  --code-function: #1767b0;
+  --code-selection: #dce6c6;
 
   color-scheme: light;
 }
 
 :root {
-  /* Type: Bricolage Grotesque for headings, IBM Plex Sans for UI, JetBrains Mono for code. */
-  --font-heading: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-code: var(--font-jetbrains), ui-monospace, monospace;
+  /* Type: one superfamily. Barlow Condensed for headlines (trail and road signage),
+     Barlow for body and UI, Martian Mono for code only. */
+  --font-heading: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+  --font-body: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-martian), ui-monospace, monospace;
 
-  /* Scale, ratio 1.25 on a 16px base. */
+  /* Scale: 14 / 16 / 20 / 25 / 32 / 48, and 88 only for the landing headline. */
   --step--2: 0.8125rem;
   --step--1: 0.875rem;
   --step-0: 1rem;
   --step-1: 1.25rem;
   --step-2: 1.5625rem;
-  --step-3: 1.953rem;
-  --step-4: 2.441rem;
-  --step-5: 3.052rem;
+  --step-3: 2rem;
+  --step-4: 3rem;
+  --step-5: 3.5rem;
+  --step-hero: clamp(3.25rem, 7.2vw, 5.5rem);
 
   /* One chamfered corner instead of a uniform radius: the facet from the low-poly logo. */
   --facet: 9px;
-  --radius-sm: 4px;
-  --radius-md: 6px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;

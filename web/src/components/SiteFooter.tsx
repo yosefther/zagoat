@@ -10,7 +10,7 @@ export function SiteFooter() {
         <nav aria-label="Legal">
           <ul className="flex flex-wrap items-center gap-5">
             <li>
-              <Link href="/problems" className="text-muted hover:text-ink">Problems</Link>
+              <Link href="/tasks" className="text-muted hover:text-ink">Tasks</Link>
             </li>
             <li>
               <Link href="/pricing" className="text-muted hover:text-ink">Pricing</Link>

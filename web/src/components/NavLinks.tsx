@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 // Pricing hides on phones to keep the header on one line; the footer links to it too.
 const NAV_LINKS = [
-  { href: "/problems", label: "Problems", className: "" },
+  { href: "/tasks", label: "Tasks", className: "" },
   { href: "/pricing", label: "Pricing", className: "hidden sm:inline-flex" },
 ];
 

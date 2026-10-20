@@ -86,9 +86,9 @@ export function PricingPlans() {
           {error}
         </p>
       )}
-      <div className="grid overflow-hidden rounded-md bg-panel md:auto-cols-fr md:grid-flow-col">
+      <div className="grid border-t border-line md:auto-cols-fr md:grid-flow-col">
         <PlanCard title="Free" price={formatPrice(0, plans.currency)} current={current === "free"}>
-          <p>A few free problems with the editor, tests, hints and reference solutions.</p>
+          <p>A few free tasks with the editor, tests, hints and reference solutions.</p>
           {!signedIn && (
             <Link href={signInLink} className="btn-secondary">
               Sign in to start
@@ -105,7 +105,7 @@ export function PricingPlans() {
           }
           current={current === "lifetime"}
         >
-          <p>One payment for every problem, hint and walkthrough, for as long as zagoat runs.</p>
+          <p>One payment for every task, hint and walkthrough, for as long as zagoat runs.</p>
           {plans.lifetime_price_cents !== null && (
             <p className="text-sm text-muted">
               {plans.lifetime_available
@@ -163,14 +163,14 @@ function PlanCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="flex flex-col gap-3 border-line p-6 not-first:border-t md:not-first:border-t-0 md:not-first:border-l">
+    <section className="flex flex-col gap-3 border-line py-6 not-first:border-t md:pr-8 md:not-first:border-t-0 md:not-first:border-l md:not-first:pl-8">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-lg font-bold">{title}</h3>
+        <h3 className="text-xl">{title}</h3>
         {current && (
           <span className="text-xs font-medium text-success">Your plan</span>
         )}
       </div>
-      <p className="font-heading text-2xl font-bold">{price}</p>
+      <p className="font-heading text-3xl font-bold">{price}</p>
       <div className="flex flex-col gap-3 text-muted [&>a]:self-start [&>button]:self-start">
         {children}
       </div>

@@ -9,10 +9,10 @@ export const metadata: Metadata = {
 };
 
 const CAPABILITIES: [string, string, string][] = [
-  ["Browse problems and read statements", "Yes", "Yes"],
-  ["Editor, Run and Submit on free problems", "Yes", "Yes"],
-  ["Editor, Run and Submit on paid problems", "No", "Yes"],
-  ["Hints", "On free problems", "Yes"],
+  ["Browse tasks and read statements", "Yes", "Yes"],
+  ["Editor, Run and Submit on free tasks", "Yes", "Yes"],
+  ["Editor, Run and Submit on paid tasks", "No", "Yes"],
+  ["Hints", "On free tasks", "Yes"],
   ["Walkthroughs", "No", "Yes"],
   ["Reference solution", "After your first Submit", "After your first Submit"],
   ["Submits per day", "10", "100 (fair use)"],

@@ -2,27 +2,24 @@ import { Difficulty, LockIcon } from "@/components/ProblemBits";
 import { CATEGORY_LABELS } from "@/lib/labels";
 import type { ProblemSummary } from "@/lib/types";
 
-/** "RAG · Medium · 45 min", in sentence case, with difficulty in its color. */
+/** The grade, then a plain phrase: "RAG task, about 45 minutes". */
 export function ProblemMeta({
   problem,
 }: {
   problem: Pick<ProblemSummary, "category" | "difficulty" | "est_minutes" | "access">;
 }) {
+  const category = CATEGORY_LABELS[problem.category] ?? problem.category;
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-      <span>{CATEGORY_LABELS[problem.category] ?? problem.category}</span>
-      <span aria-hidden="true">·</span>
+    <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
       <Difficulty level={problem.difficulty} />
-      <span aria-hidden="true">·</span>
-      <span>{problem.est_minutes} min</span>
+      <span className="text-muted">
+        {category} task, about {problem.est_minutes} minutes
+      </span>
       {problem.access === "paid" && (
-        <>
-          <span aria-hidden="true">·</span>
-          <span className="inline-flex items-center gap-1">
-            <LockIcon label="" />
-            Lifetime and Pro
-          </span>
-        </>
+        <span className="inline-flex items-center gap-1.5 text-muted">
+          <LockIcon label="" />
+          Lifetime and Pro
+        </span>
       )}
     </p>
   );

@@ -1,16 +1,36 @@
 import { DIFFICULTY_LABELS, PROGRESS_LABELS } from "@/lib/labels";
 import type { ProblemSummary } from "@/lib/types";
 
+type Level = ProblemSummary["difficulty"];
+
 const DIFFICULTY_CLASSES = {
   easy: "text-easy",
   medium: "text-medium",
   hard: "text-hard",
 } as const;
 
-/** Difficulty as colored text (never a filled pill). */
-export function Difficulty({ level }: { level: ProblemSummary["difficulty"] }) {
+const PEAKS: Record<Level, number> = { easy: 1, medium: 2, hard: 3 };
+
+/** Difficulty as a grade: one to three peaks, plus the word, in the difficulty's color. */
+export function Difficulty({ level }: { level: Level }) {
+  const filled = PEAKS[level];
   return (
-    <span className={`font-medium ${DIFFICULTY_CLASSES[level]}`}>{DIFFICULTY_LABELS[level]}</span>
+    <span className={`inline-flex items-center gap-1.5 font-medium ${DIFFICULTY_CLASSES[level]}`}>
+      <svg width="27" height="10" viewBox="0 0 27 10" aria-hidden="true" className="shrink-0">
+        {[0, 1, 2].map((i) => (
+          <path
+            key={i}
+            d={`M${i * 9 + 0.75} 9.25 L${i * 9 + 4.5} 0.75 L${i * 9 + 8.25} 9.25 Z`}
+            fill={i < filled ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth="1.2"
+            strokeLinejoin="round"
+            opacity={i < filled ? 1 : 0.45}
+          />
+        ))}
+      </svg>
+      {DIFFICULTY_LABELS[level]}
+    </span>
   );
 }
 

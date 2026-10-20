@@ -129,8 +129,8 @@ export function CodeEditor({
       options={{
         readOnly,
         ariaLabel: label,
-        fontFamily: "var(--font-jetbrains), ui-monospace, monospace",
-        fontSize: 14,
+        fontFamily: "var(--font-martian), ui-monospace, monospace",
+        fontSize: 13,
         lineHeight: 22,
         minimap: { enabled: false },
         scrollBeyondLastLine: false,

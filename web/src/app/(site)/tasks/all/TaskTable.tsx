@@ -37,7 +37,7 @@ function compare(a: ProblemSummary, b: ProblemSummary, key: SortKey): number {
   }
 }
 
-export function ProblemTable({ initial }: { initial: ProblemSummary[] }) {
+export function TaskTable({ initial }: { initial: ProblemSummary[] }) {
   const session = useSession();
   const router = useRouter();
   const [problems, setProblems] = useState(initial);
@@ -87,7 +87,7 @@ export function ProblemTable({ initial }: { initial: ProblemSummary[] }) {
   function openRandom() {
     const pool = visible.length ? visible : problems;
     const pick = pool[Math.floor(Math.random() * pool.length)];
-    if (pick) router.push(`/problems/${pick.id}`);
+    if (pick) router.push(`/tasks/${pick.id}`);
   }
 
   const signedIn = session.status === "signed_in";
@@ -132,12 +132,12 @@ export function ProblemTable({ initial }: { initial: ProblemSummary[] }) {
           </>
         )}
         <label className="sr-only" htmlFor="filter-search">
-          Search problems
+          Search tasks
         </label>
         <input
           id="filter-search"
           type="search"
-          placeholder="Search problems"
+          placeholder="Search tasks"
           className="field min-w-0 flex-1 py-1.5 text-sm sm:max-w-xs"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -169,7 +169,7 @@ export function ProblemTable({ initial }: { initial: ProblemSummary[] }) {
                 </td>
                 <td className="py-2.5 pr-3">
                   <span className="inline-flex items-center gap-2">
-                    <Link href={`/problems/${problem.id}`} className="font-medium text-ink no-underline hover:underline">
+                    <Link href={`/tasks/${problem.id}`} className="font-medium text-ink no-underline hover:underline">
                       {problem.title}
                     </Link>
                     {problem.access === "paid" && <LockIcon />}
@@ -191,7 +191,7 @@ export function ProblemTable({ initial }: { initial: ProblemSummary[] }) {
         </table>
         {visible.length === 0 && (
           <p className="p-6 text-sm text-muted">
-            No problems match these filters. Clear the search or pick a different filter.
+            No tasks match these filters. Clear the search or pick a different filter.
           </p>
         )}
       </div>
