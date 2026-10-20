@@ -4,7 +4,7 @@ import { safeReturnPath, signInUrl } from "./auth";
 
 describe("safeReturnPath", () => {
   it.each([
-    ["/problems", "/problems"],
+    ["/tasks", "/tasks"],
     [null, "/"],
     ["https://evil.example", "/"],
     ["//evil.example", "/"],

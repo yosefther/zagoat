@@ -77,7 +77,8 @@ def validate_task(executor: Executor, settings: Settings, task: TaskSpec) -> lis
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     settings = get_settings()
-    problems_dir = Path(args[0]) if args else settings.problems_dir
+    # Absolute, because the harness runs in a temporary working folder.
+    problems_dir = (Path(args[0]) if args else settings.problems_dir).resolve()
     tasks = load_tasks(problems_dir)
     if not tasks:
         print(f"no tasks found in {problems_dir}", file=sys.stderr)

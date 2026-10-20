@@ -9,7 +9,7 @@ import { ConsolePanel } from "./ConsolePanel";
 import { EditorPanel } from "./EditorPanel";
 import { Description, LeftPanel } from "./LeftPanel";
 import { useProblem } from "./ProblemContext";
-import { TopBar } from "./TopBar";
+import { TopBar, type Neighbors } from "./TopBar";
 import { WorkspaceProvider } from "./WorkspaceContext";
 import { Logo } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -18,7 +18,7 @@ import { useIsDesktop } from "@/lib/useIsDesktop";
 
 type Props = {
   publicProblem: ProblemDetail;
-  neighbors: { previous: string | null; next: string | null };
+  neighbors: Neighbors;
   statement: ReactNode;
 };
 
@@ -31,8 +31,8 @@ export function Workspace({ publicProblem, neighbors, statement }: Props) {
         <header className="flex h-[var(--header-height)] items-center justify-between border-b border-line px-4">
           <Logo size={24} />
           <div className="flex items-center gap-1">
-            <Link href="/problems" className="btn-quiet px-2.5">
-              Problems
+            <Link href={neighbors.back.href} className="btn-quiet px-2.5">
+              {neighbors.back.label}
             </Link>
             <ThemeToggle />
           </div>

@@ -4,8 +4,9 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Problem
-from app.problems.loader import PublicProblem, load_all
+from app.models import LearningPath, Problem
+from app.problems.loader import PublicProblem, load_all, load_paths
+from app.problems.schema import PathSpec
 
 
 @dataclass
@@ -14,6 +15,7 @@ class SyncReport:
     updated: list[str] = field(default_factory=list)
     unchanged: list[str] = field(default_factory=list)
     unpublished: list[str] = field(default_factory=list)
+    paths: list[str] = field(default_factory=list)
 
 
 def _apply(row: Problem, problem: PublicProblem) -> None:
@@ -66,5 +68,26 @@ def sync_problems(db: Session, problems: list[PublicProblem]) -> SyncReport:
     return report
 
 
+def sync_paths(db: Session, paths: list[PathSpec], report: SyncReport) -> None:
+    """Replace all paths with the file's contents, keeping the file's order."""
+    existing = {row.id: row for row in db.scalars(select(LearningPath))}
+    for position, spec in enumerate(paths):
+        row = existing.pop(spec.id, None) or LearningPath(id=spec.id)
+        row.title = spec.title
+        row.summary = spec.summary
+        row.position = position
+        row.task_ids = list(spec.tasks)
+        db.add(row)
+        report.paths.append(spec.id)
+    for row in existing.values():
+        db.delete(row)
+    db.commit()
+
+
 def sync_from_dir(db: Session, problems_dir: Path) -> SyncReport:
-    return sync_problems(db, load_all(problems_dir))
+    problems = load_all(problems_dir)
+    # Validate paths before writing anything, so a bad paths.yaml changes nothing.
+    paths = load_paths(problems_dir, {p.spec.id for p in problems})
+    report = sync_problems(db, problems)
+    sync_paths(db, paths, report)
+    return report

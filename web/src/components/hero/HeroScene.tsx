@@ -1,98 +1,162 @@
 "use client";
 
-import { Float } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useResolvedTheme } from "@/lib/useResolvedTheme";
 
-type Palette = { brand: string; soft: string; neutral: string; deep: string; light: string };
+type Palette = {
+  page: string;
+  rockLow: string;
+  rockHigh: string;
+  snow: string;
+  brand: string;
+  soft: string;
+};
 
 /** Scene colors come from the design tokens, so the hero follows the theme. */
 function readPalette(): Palette {
   const css = getComputedStyle(document.documentElement);
   const token = (name: string) => css.getPropertyValue(name).trim();
   return {
+    page: token("--page"),
+    rockLow: token("--rock-low"),
+    rockHigh: token("--rock-high"),
+    snow: token("--snow"),
     brand: token("--brand"),
     soft: token("--brand-soft"),
-    neutral: token("--field"),
-    deep: token("--raised"),
-    // Lights must be bright in both themes: the lighter of the ink and page colors.
-    light: token(document.documentElement.getAttribute("data-theme") === "light" ? "--page" : "--ink"),
   };
 }
 
-/** A curly brace as a low-poly tube, echoing the goat's horns in the logo. */
-function braceGeometry(): THREE.TubeGeometry {
-  const points = [
-    [0.42, 1.05],
-    [0.12, 0.98],
-    [0.04, 0.72],
-    [0.04, 0.3],
-    [-0.08, 0.08],
-    [-0.32, 0],
-    [-0.08, -0.08],
-    [0.04, -0.3],
-    [0.04, -0.72],
-    [0.12, -0.98],
-    [0.42, -1.05],
-  ].map(([x, y]) => new THREE.Vector3(x, y, 0));
-  return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points), 40, 0.1, 6, false);
+// Peaks as (x, z, height, spread). The tallest is the summit the trail climbs to.
+const PEAKS: [number, number, number, number][] = [
+  [1.5, -0.7, 2.7, 1.15],
+  [-1.1, -1.6, 1.85, 1.0],
+  [3.7, -1.9, 1.6, 0.95],
+  [-3.4, -2.4, 1.3, 1.1],
+  [0.2, -3.2, 1.4, 1.3],
+];
+const SNOW_LINE = 1.85;
+
+function height(x: number, z: number): number {
+  let h = 0;
+  for (const [px, pz, ph, spread] of PEAKS) {
+    const d2 = ((x - px) ** 2 + (z - pz) ** 2) / (spread * spread);
+    h = Math.max(h, ph * Math.exp(-d2));
+  }
+  // Ridges and scree: deterministic ripples, so every render is the same mountain.
+  h += 0.12 * Math.sin(x * 2.3 + z * 1.7) * Math.cos(z * 2.9 - x * 0.6);
+  h += 0.06 * Math.sin(x * 5.1 - z * 3.3);
+  return Math.max(0, h - 0.05);
 }
 
-function Shapes({ palette }: { palette: Palette }) {
-  const group = useRef<THREE.Group>(null);
-  const brace = useMemo(() => braceGeometry(), []);
+/** A faceted terrain: every triangle one flat color, like the low-poly goat. */
+function terrainGeometry(palette: Palette): THREE.BufferGeometry {
+  const plane = new THREE.PlaneGeometry(11, 6, 34, 18).toNonIndexed();
+  plane.rotateX(-Math.PI / 2);
+  plane.translate(0.4, 0, -1.4);
+  const position = plane.getAttribute("position");
+  for (let i = 0; i < position.count; i++) {
+    position.setY(i, height(position.getX(i), position.getZ(i)));
+  }
+  const low = new THREE.Color(palette.rockLow);
+  const high = new THREE.Color(palette.rockHigh);
+  const snow = new THREE.Color(palette.snow);
+  const colors = new Float32Array(position.count * 3);
+  const color = new THREE.Color();
+  for (let face = 0; face < position.count; face += 3) {
+    const y = (position.getY(face) + position.getY(face + 1) + position.getY(face + 2)) / 3;
+    if (y > SNOW_LINE) color.copy(snow);
+    else color.copy(low).lerp(high, Math.min(1, y / SNOW_LINE));
+    for (let v = 0; v < 3; v++) color.toArray(colors, (face + v) * 3);
+  }
+  plane.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+  plane.computeVertexNormals();
+  return plane;
+}
 
-  // Lean gently toward the cursor.
-  useFrame((state, delta) => {
-    if (!group.current) return;
-    const ease = 1 - Math.exp(-delta * 2.5);
-    group.current.rotation.y += (state.pointer.x * 0.35 - group.current.rotation.y) * ease;
-    group.current.rotation.x += (-state.pointer.y * 0.2 - group.current.rotation.x) * ease;
-  });
-
-  const matte = (color: string) => (
-    <meshStandardMaterial color={color} roughness={0.62} metalness={0.05} flatShading />
+/** The route from the valley to the summit, following the ground. */
+function trailCurve(): THREE.CatmullRomCurve3 {
+  const guide = new THREE.CatmullRomCurve3(
+    // Switchbacks up the summit's front face, the way a real trail climbs.
+    [
+      [-3.4, 1.9],
+      [-1.9, 1.5],
+      [-0.7, 1.05],
+      [0.9, 0.85],
+      [1.7, 0.55],
+      [0.7, 0.25],
+      [0.55, -0.05],
+      [1.75, -0.25],
+      [1.5, -0.7],
+    ].map(([x, z]) => new THREE.Vector3(x, 0, z)),
+    false,
+    "centripetal", // no overshoot loops at the bends
   );
+  const points = guide.getSpacedPoints(160).map((p) => new THREE.Vector3(p.x, height(p.x, p.z) + 0.04, p.z));
+  return new THREE.CatmullRomCurve3(points, false, "centripetal");
+}
+
+const TRAIL_SEGMENTS = 320;
+const RADIAL = 5;
+const DRAW_SECONDS = 2.6;
+// Where the waypoints sit along the trail: the two open tasks, then the summit.
+const WAYPOINTS = [0.3, 0.62, 1];
+
+function Mountain({ palette }: { palette: Palette }) {
+  const group = useRef<THREE.Group>(null);
+  const trail = useRef<THREE.Mesh>(null);
+  const markers = useRef<(THREE.Mesh | null)[]>([]);
+  const started = useRef<number | null>(null);
+  const terrain = useMemo(() => terrainGeometry(palette), [palette]);
+  const curve = useMemo(() => trailCurve(), []);
+  const tube = useMemo(() => new THREE.TubeGeometry(curve, TRAIL_SEGMENTS, 0.022, RADIAL, false), [curve]);
+  const markerPoints = useMemo(() => WAYPOINTS.map((t) => curve.getPointAt(t)), [curve]);
+
+  useFrame((state, delta) => {
+    // The one orchestrated moment: the trail draws itself to the summit, once.
+    if (started.current === null) started.current = state.clock.elapsedTime;
+    const progress = Math.min(1, (state.clock.elapsedTime - started.current) / DRAW_SECONDS);
+    const eased = 1 - (1 - progress) ** 3;
+    tube.setDrawRange(0, Math.floor(eased * TRAIL_SEGMENTS) * RADIAL * 6);
+    markers.current.forEach((marker, i) => {
+      if (marker) marker.visible = eased >= WAYPOINTS[i] - 0.01;
+    });
+    // Then only a slight lean toward the cursor.
+    if (group.current) {
+      const ease = 1 - Math.exp(-delta * 2);
+      group.current.rotation.y += (state.pointer.x * 0.12 - group.current.rotation.y) * ease;
+      group.current.rotation.x += (-state.pointer.y * 0.03 - group.current.rotation.x) * ease;
+    }
+  });
 
   return (
     <group ref={group}>
-      <Float speed={1.1} rotationIntensity={0.35} floatIntensity={0.5}>
-        <group position={[-0.45, 0.15, 0.4]} rotation={[0.1, 0.35, 0.08]}>
-          <mesh geometry={brace} position={[-0.55, 0, 0]}>
-            {matte(palette.brand)}
-          </mesh>
-          <mesh geometry={brace} position={[0.55, 0, 0]} scale={[-1, 1, 1]}>
-            {matte(palette.brand)}
-          </mesh>
-        </group>
-      </Float>
-      <Float speed={0.8} rotationIntensity={0.6} floatIntensity={0.7}>
-        <mesh position={[1.55, 0.95, -0.6]} rotation={[0.4, 0.2, 0]}>
-          <icosahedronGeometry args={[0.62, 0]} />
-          {matte(palette.soft)}
+      <mesh geometry={terrain}>
+        <meshStandardMaterial vertexColors flatShading roughness={0.92} metalness={0} />
+      </mesh>
+      <mesh ref={trail} geometry={tube}>
+        <meshStandardMaterial color={palette.brand} emissive={palette.brand} emissiveIntensity={0.35} roughness={0.5} />
+      </mesh>
+      {markerPoints.map((point, i) => (
+        <mesh
+          key={i}
+          ref={(mesh) => {
+            markers.current[i] = mesh;
+          }}
+          position={[point.x, point.y + (i === WAYPOINTS.length - 1 ? 0.2 : 0.1), point.z]}
+          visible={false}
+        >
+          <octahedronGeometry args={[i === WAYPOINTS.length - 1 ? 0.13 : 0.085, 0]} />
+          <meshStandardMaterial
+            color={i === WAYPOINTS.length - 1 ? palette.soft : palette.brand}
+            emissive={palette.brand}
+            emissiveIntensity={0.25}
+            flatShading
+          />
         </mesh>
-      </Float>
-      <Float speed={0.9} rotationIntensity={0.5} floatIntensity={0.6}>
-        <mesh position={[1.35, -1.05, 0.1]} rotation={[0.9, 0.3, 0.2]}>
-          <torusGeometry args={[0.46, 0.15, 6, 14]} />
-          {matte(palette.neutral)}
-        </mesh>
-      </Float>
-      <Float speed={0.7} rotationIntensity={0.4} floatIntensity={0.5}>
-        <mesh position={[-1.9, -1.0, -0.8]}>
-          <dodecahedronGeometry args={[0.5, 0]} />
-          {matte(palette.neutral)}
-        </mesh>
-      </Float>
-      <Float speed={1.0} rotationIntensity={0.7} floatIntensity={0.5}>
-        <mesh position={[-1.75, 1.15, -1.2]} rotation={[0.5, 0.5, 0]}>
-          <octahedronGeometry args={[0.38, 0]} />
-          {matte(palette.soft)}
-        </mesh>
-      </Float>
+      ))}
     </group>
   );
 }
@@ -104,20 +168,24 @@ export default function HeroScene({ active }: { active: boolean }) {
     void theme;
     return readPalette();
   }, [theme]);
+  const light = theme === "light";
 
   return (
     <Canvas
       frameloop={active ? "always" : "never"}
       dpr={[1, 1.5]}
-      camera={{ position: [0, 0, 6.2], fov: 42 }}
+      camera={{ position: [-0.4, 2.7, 6.2], fov: 36 }}
+      onCreated={({ camera }) => camera.lookAt(0.6, 0.85, -1)}
       gl={{ antialias: true, alpha: true, powerPreference: "low-power" }}
       aria-hidden="true"
     >
-      <ambientLight intensity={0.55} color={palette.light} />
-      <directionalLight position={[-3, 4, 5]} intensity={1.6} color={palette.light} />
-      <pointLight position={[3, -1, 3]} intensity={18} color={palette.soft} />
-      <pointLight position={[-4, -2, -2]} intensity={10} color={palette.brand} />
-      <Shapes palette={palette} />
+      {/* Distant ridges fade into the sky. */}
+      <fog attach="fog" args={[palette.page, 6.5, 13]} />
+      <ambientLight intensity={light ? 0.75 : 0.45} color={palette.snow} />
+      <directionalLight position={[4, 6, 4]} intensity={light ? 1.5 : 1.25} color={palette.snow} />
+      {/* Low evening light from behind the range, tinted by the logo's facets. */}
+      <directionalLight position={[-5, 2.5, -6]} intensity={1.1} color={palette.soft} />
+      <Mountain palette={palette} />
     </Canvas>
   );
 }

@@ -216,3 +216,15 @@ class WebhookEvent(Base):
         DateTime(timezone=True), server_default=func.now()
     )
     processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class LearningPath(Base):
+    """A curated route through tasks, synced from problems/paths.yaml."""
+
+    __tablename__ = "paths"
+
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    title: Mapped[str] = mapped_column(String(80))
+    summary: Mapped[str] = mapped_column(String(200))
+    position: Mapped[int] = mapped_column(Integer)
+    task_ids: Mapped[list[str]] = mapped_column(JSONB)

@@ -45,7 +45,7 @@ export function HistoryList() {
   if (items.length === 0) {
     return (
       <p className="text-muted">
-        No submissions yet. <Link href="/problems">Pick a problem</Link> and submit a solution.
+        No submissions yet. <Link href="/tasks">Pick a task</Link> and submit a solution.
       </p>
     );
   }
@@ -55,7 +55,7 @@ export function HistoryList() {
         <thead className="text-muted">
           <tr className="border-b border-line">
             <th scope="col" className="px-4 py-2 font-medium">Verdict</th>
-            <th scope="col" className="py-2 pr-3 font-medium">Problem</th>
+            <th scope="col" className="py-2 pr-3 font-medium">Task</th>
             <th scope="col" className="py-2 pr-3 font-medium">Submitted</th>
             <th scope="col" className="py-2 pr-3 font-medium">Tests</th>
             <th scope="col" className="py-2 pr-3 font-medium">Timer</th>
@@ -101,7 +101,7 @@ function HistoryRow({ item, title }: { item: HistoryItem; title: string }) {
           </button>
         </td>
         <td className="py-2.5 pr-3">
-          <Link href={`/problems/${item.problem_id}`} className="text-ink">
+          <Link href={`/tasks/${item.problem_id}`} className="text-ink">
             {title}
           </Link>
         </td>

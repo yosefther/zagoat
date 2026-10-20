@@ -36,7 +36,7 @@ export function LeftPanel({ publicProblem, statement }: Props) {
   return (
     <div className="flex h-full min-h-0 flex-col bg-panel">
       <div className="border-b border-line">
-        <Tabs tabs={TABS} active={tab} onSelect={setTab} idPrefix={TABS_ID} label="Problem" />
+        <Tabs tabs={TABS} active={tab} onSelect={setTab} idPrefix={TABS_ID} label="Task" />
       </div>
       <div
         id={panelId(TABS_ID)}

@@ -59,7 +59,7 @@ export function HeroVisual() {
   return (
     <div
       ref={box}
-      className="relative aspect-[4/3] w-full"
+      className="hero-fade relative h-full min-h-[18rem] w-full"
       data-hero-mode={live ? "live" : "static"}
       data-hero-active={live && active ? "true" : "false"}
     >
@@ -71,14 +71,14 @@ export function HeroVisual() {
           <img
             src="/brand/hero-static-dark.png"
             alt=""
-            className="h-full w-full object-contain light:hidden"
+            className="absolute inset-0 h-full w-full object-contain object-bottom light:hidden"
             fetchPriority="high"
           />
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/brand/hero-static-light.png"
             alt=""
-            className="hidden h-full w-full object-contain light:block"
+            className="absolute inset-0 hidden h-full w-full object-contain object-bottom light:block"
           />
         </>
       )}

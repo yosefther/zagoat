@@ -35,6 +35,7 @@
   --text-2xl: var(--step-3);
   --text-3xl: var(--step-4);
   --text-4xl: var(--step-5);
+  --text-hero: var(--step-hero);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -46,15 +47,17 @@
     background: var(--page);
     color: var(--ink);
     font-family: var(--font-body);
-    line-height: 1.6;
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
   }
 
   h1,
   h2,
   h3 {
     font-family: var(--font-heading);
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.005em;
     text-wrap: balance;
   }
 
@@ -89,6 +92,14 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* The range fades into the sky at the hero's left and bottom edges instead of ending in a wall. */
+@utility hero-fade {
+  mask-image:
+    linear-gradient(to right, transparent, #000 22%),
+    linear-gradient(to top, transparent, #000 18%);
+  mask-composite: intersect;
 }
 
 /* A facet: the top-right corner is cut at 45°, echoing the low-poly goat. */

@@ -12,11 +12,11 @@ export default function NotFound() {
         <h1 className="text-3xl font-bold">We couldn&apos;t find that page</h1>
         <p className="max-w-[var(--measure)] text-muted">
           The link may be old, or the page may have moved. Check the address, or browse the
-          problem list.
+          task list.
         </p>
         <div className="flex gap-3">
-          <Link href="/problems" className="btn-primary">
-            Browse problems
+          <Link href="/tasks" className="btn-primary">
+            Browse tasks
           </Link>
           <Link href="/" className="btn-secondary">
             Go to the home page

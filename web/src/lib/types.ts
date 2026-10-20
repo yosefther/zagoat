@@ -136,3 +136,12 @@ export type Plans = {
   payments_enabled: boolean;
   current_plan: PlanName | null;
 };
+
+export type LearningPath = {
+  id: string;
+  title: string;
+  summary: string;
+  tasks: ProblemSummary[];
+  solved: number;
+  next_task_id: string | null;
+};

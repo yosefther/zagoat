@@ -50,6 +50,21 @@ grader:
 mock_llm: fixtures/llm.jsonl # optional
 ```
 
+## Paths
+
+`problems/paths.yaml` lists the paths shown on `/tasks`, in display order. Each path has
+an `id` (slug), a `title`, a one-line `summary` and an ordered list of `tasks` (folder
+names), usually easier first. A task can be in several paths. Validation fails if a path
+lists an unknown task or the same task twice; unpublished tasks are skipped on the site.
+
+```yaml
+- id: retrieval-and-rag
+  title: Retrieval and RAG
+  summary: Chunking, retrieval quality and grounding, the pieces RAG interviews poke at.
+  tasks:
+    - rag-chunking-01
+```
+
 ## Writing tests
 
 Tests are plain pytest files that import the user's modules by name (`from chunker import

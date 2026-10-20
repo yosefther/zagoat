@@ -11,9 +11,15 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/UserMenu";
 import { formatDuration, formatLocalTime } from "@/lib/format";
 
+export type Neighbors = {
+  previous: string | null;
+  next: string | null;
+  back: { href: string; label: string };
+};
+
 type Props = {
   title: string;
-  neighbors: { previous: string | null; next: string | null };
+  neighbors: Neighbors;
 };
 
 /** Workspace top bar: navigation, title, timer, remaining Submits, Run and Submit. */
@@ -25,12 +31,12 @@ export function TopBar({ title, neighbors }: Props) {
   return (
     <header className="flex h-[var(--header-height)] shrink-0 items-center gap-3 border-b border-line bg-page px-3">
       <Logo withName={false} size={26} />
-      <nav aria-label="Problem navigation" className="flex items-center">
-        <Link href="/problems" className="btn-quiet px-2.5">
-          Problems
+      <nav aria-label="Task navigation" className="flex items-center">
+        <Link href={neighbors.back.href} className="btn-quiet max-w-48 truncate px-2.5">
+          {neighbors.back.label}
         </Link>
-        <NavArrow id={neighbors.previous} label="Previous problem" glyph="‹" />
-        <NavArrow id={neighbors.next} label="Next problem" glyph="›" />
+        <NavArrow href={neighbors.previous} label="Previous task" glyph="‹" />
+        <NavArrow href={neighbors.next} label="Next task" glyph="›" />
       </nav>
       <p className="min-w-0 flex-1 truncate font-heading font-bold" title={title}>
         {title}
@@ -93,8 +99,8 @@ export function TopBar({ title, neighbors }: Props) {
   );
 }
 
-function NavArrow({ id, label, glyph }: { id: string | null; label: string; glyph: string }) {
-  if (!id) {
+function NavArrow({ href, label, glyph }: { href: string | null; label: string; glyph: string }) {
+  if (!href) {
     return (
       <span className="btn-quiet px-2.5 opacity-40" aria-hidden="true">
         {glyph}
@@ -102,7 +108,7 @@ function NavArrow({ id, label, glyph }: { id: string | null; label: string; glyp
     );
   }
   return (
-    <Link href={`/problems/${id}`} className="btn-quiet px-2.5 text-lg leading-none" aria-label={label} title={label}>
+    <Link href={href} className="btn-quiet px-2.5 text-lg leading-none" aria-label={label} title={label}>
       {glyph}
     </Link>
   );

@@ -12,7 +12,7 @@ from pathlib import Path
 import yaml
 from pydantic import ValidationError
 
-from app.problems.schema import ProblemSpec
+from app.problems.schema import PathSpec, ProblemSpec
 
 # Starter and reference files must be small text files the editor can show.
 MAX_CODE_FILE_BYTES = 200_000
@@ -146,3 +146,33 @@ def load_all(problems_dir: Path) -> list[PublicProblem]:
         p for p in problems_dir.iterdir() if p.is_dir() and not p.name.startswith(("_", "."))
     )
     return [load_problem(root) for root in roots]
+
+
+PATHS_FILE = "paths.yaml"
+
+
+def load_paths(problems_dir: Path, task_ids: set[str]) -> list[PathSpec]:
+    """Read problems/paths.yaml. Every task id must exist; path ids must be unique."""
+    path_file = problems_dir / PATHS_FILE
+    if not path_file.is_file():
+        return []
+    try:
+        raw = yaml.safe_load(_read_text(path_file)) or []
+        if not isinstance(raw, list):
+            raise ProblemError(f"{path_file}: must be a list of paths")
+        paths = [PathSpec.model_validate(item) for item in raw]
+    except (yaml.YAMLError, ValidationError) as exc:
+        raise ProblemError(f"{path_file}: {exc}") from exc
+    seen: set[str] = set()
+    for spec in paths:
+        if spec.id in seen:
+            raise ProblemError(f"{path_file}: path id '{spec.id}' is used twice")
+        seen.add(spec.id)
+        missing = [task for task in spec.tasks if task not in task_ids]
+        if missing:
+            raise ProblemError(
+                f"{path_file}: path '{spec.id}' lists unknown tasks: {', '.join(missing)}"
+            )
+        if len(set(spec.tasks)) != len(spec.tasks):
+            raise ProblemError(f"{path_file}: path '{spec.id}' lists a task twice")
+    return paths

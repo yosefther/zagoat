@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-import { bricolage, jetbrainsMono, plexSans } from "@/app/fonts";
+import { barlow, barlowCondensed, martianMono } from "@/app/fonts";
 import { SessionProvider } from "@/lib/session";
 import { DEFAULT_THEME, THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [{ color: "#0f120b" }],
+  themeColor: [{ color: "#1b1e33" }],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       data-theme={DEFAULT_THEME}
-      className={`${bricolage.variable} ${plexSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${barlowCondensed.variable} ${barlow.variable} ${martianMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
