@@ -16,8 +16,11 @@ design follows the `zagoat-design` skill (`.claude/skills/zagoat-design/SKILL.md
 decisions, palette and contrast measurements are in [docs/design.md](docs/design.md). All
 colors, fonts and sizes are tokens in `web/src/styles/tokens.css`. Sign-in works with GitHub, Google
 or (locally only) a dev user, and the account page covers profile, the code opt-in and
-self-service deletion. Problems sync from `problems/` into Postgres and show up at
-`/problems`, with two original development tasks (one RAG, one evals). Signed-in users with
+self-service deletion. Tasks sync from `problems/` into Postgres. Users browse them at
+`/tasks`, as a grid of paths (curated routes from `problems/paths.yaml`, each with its own
+page at `/paths/[id]`) or as one table at `/tasks/all`; there are two original
+development tasks (one RAG, one evals). The internal name stays "problems" in the API,
+database and repo; old `/problems` links redirect. Signed-in users with
 access get a Monaco editor with a tab per file and debounced autosave of their draft.
 "Run tests" and "Submit solution" queue a job that the runner executes in a fresh,
 locked-down container; the page polls for the verdict, tests and metrics. Plans, limits,

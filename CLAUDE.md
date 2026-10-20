@@ -140,6 +140,7 @@ CI rejects a task unless its reference solution passes its own hidden tests with
 | webhook_events | provider_event_id (unique), type, received_at, processed_at |
 | usage_daily | user_id, day (UTC), submits |
 | waitlist | email, source, consent, created_at |
+| paths | id (slug), title, summary, position, task_ids (JSON, ordered) |
 
 Plan definitions and limits live in config, not in the database.
 
@@ -159,6 +160,7 @@ Plan definitions and limits live in config, not in the database.
 | PUT /problems/{id}/draft | Users with access | Autosave, debounced in the browser |
 | POST /problems/{id}/runs | Users with access | Checks limits, queues a Run, returns a job id |
 | POST /problems/{id}/submissions | Users with access | Checks the daily limit, queues a Submit, returns a job id |
+| GET /paths and /paths/{id} | Anyone | Paths with their tasks in order, plus the user's progress and next task |
 | GET /jobs/{id} | Job owner | Status and result |
 | GET /problems/{id}/submissions | Owner | Submission history for one problem |
 | POST /billing/checkout | Signed in | Creates a hosted checkout for Pro or Lifetime |
@@ -249,7 +251,11 @@ Webhook rules:
 
 ## 12. Pages and design
 
-Pages: landing (`/`), problems (`/problems`), problem (`/problems/[id]`), history (`/history`), pricing (`/pricing`), account (`/account`), sign-in (`/signin`), privacy (`/privacy`), terms (`/terms`) and a 404 page.
+Pages: landing (`/`), tasks (`/tasks`: paths grid, and `/tasks/all`: every task in a table), path (`/paths/[id]`), task (`/tasks/[id]`), history (`/history`), pricing (`/pricing`), account (`/account`), sign-in (`/signin`), privacy (`/privacy`), terms (`/terms`) and a 404 page. Old `/problems` links redirect to `/tasks`.
+
+Users see "tasks" everywhere (decided 2026-10-22). The API, database and the `problems/` folder keep the internal name "problems".
+
+Paths (decided 2026-10-22): a path is a named, ordered route through tasks, defined in `problems/paths.yaml` and validated in CI. `/tasks` shows the paths as a grid; picking one opens its page, and on a task opened from a path, previous and next follow that path. Path progress comes from task progress; there is no separate "join path" step.
 
 - Landing: the 3D hero, then 2–3 real sample tasks as read-only previews, pricing, and a waitlist form (email plus consent checkbox). The privacy page must be live before the waitlist collects any email.
 - Privacy and terms: simple placeholder text, clearly marked for my review before launch.

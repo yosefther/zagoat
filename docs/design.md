@@ -1,77 +1,80 @@
 # zagoat design
 
-Approved by the owner on 2026-10-21. The rules for any UI work are in
-[`.claude/skills/zagoat-design/SKILL.md`](../.claude/skills/zagoat-design/SKILL.md); this file
-records the decisions made under them. Every value lives once in
-[`web/src/styles/tokens.css`](../web/src/styles/tokens.css).
+Second direction, approved by the owner on 2026-10-21 after the first (olive-black with lime)
+was rejected as generic. Rules for any UI work: [`.claude/skills/frontend-design/SKILL.md`](../.claude/skills/frontend-design/SKILL.md)
+and [`.claude/skills/zagoat-design/SKILL.md`](../.claude/skills/zagoat-design/SKILL.md).
+Every value lives once in [`web/src/styles/tokens.css`](../web/src/styles/tokens.css).
 
-## Palette
+## Concept
 
-Sampled from `web/public/brand/logo.png` with Pillow (6-color quantize, transparent pixels
-ignored). The logo is one hue: a yellow-green body and lighter facets.
+zagoat is a goat, and goats climb. Each task is an ascent; a path is a route up the
+mountain. The visuals come from that world: low-poly ridgelines in the logo's faceted style,
+trail signage type, grades. The copy stays plain.
 
-| Token | Dark (default) | Light | Source |
+## Palette: alpine dusk
+
+| Token | Dark (default) | Light | Role |
 | --- | --- | --- | --- |
-| `--brand` | `#96D927` | `#96D927` (fills only) | Logo body |
-| `--brand-strong` (links, focus) | `#B4E86A` | `#3D6A06` | Logo body, lightened or darkened for contrast |
-| `--brand-soft` (highlights, 3D hero) | `#C6EE83` | `#C6EE83` | Logo facets and glow |
-| `--page` / `--panel` / `--raised` | `#0F120B` / `#161B10` / `#20271A` | `#F6F8F0` / `#FFFFFF` / `#EEF2E4` | Neutrals tinted toward the logo hue |
-| `--line` / `--field` | `#333D27` / `#66755A` | `#D5DCC6` / `#8A957A` | Same |
-| `--ink` / `--muted` | `#E8EDDF` / `#A3AD93` | `#1A2010` / `#575F48` | Same |
-| `--success` / `--warning` / `--danger` | `#3DD6C0` / `#F2B84B` / `#FF6B6B` | `#0B7A6B` / `#8A5A00` / `#C02929` | Teal, so success never reads as the brand |
-| `--easy` / `--medium` / `--hard` | `#6CB8FF` / `#C3A6FF` / `#FF7AC6` | `#1D6BBE` / `#6B43C6` / `#AD2277` | Magenta "hard", so it never reads as an error |
+| `--page` (dusk) | `#1B1E33` | `#F2F4F8` | Evening sky, roughly the complement of the logo's lime |
+| `--panel` / `--raised` | `#232742` / `#2E3353` | `#FFFFFF` / `#E6E9F1` | Ridge and scree surfaces |
+| `--ink` / `--muted` | `#F1F3EC` / `#A6ABC4` | `#1B1E33` / `#555B78` | Snow and haze text |
+| `--brand` | `#96D927` | `#96D927` (fills) | Logo body: actions, focus, the trail, passed results |
+| `--brand-strong` | `#B4E86A` | `#3E6C08` | Links and focus rings |
+| `--brand-soft` | `#C6EE83` | `#C6EE83` | Logo facets: highlights in the 3D hero |
+| `--easy` / `--medium` / `--hard` | `#7FD3FF` / `#E0A8FF` / `#FF7EA6` | `#1767B0` / `#7A3FC2` / `#B02060` | Glacier, lavender, rose |
+| `--success` / `--warning` / `--danger` | `#4FD8B0` / `#F7C35C` / `#FF7D7D` | `#0A6E58` / `#8A5A00` / `#B8282E` | Teal success never reads as the brand |
 
-Measured contrast: every text color is at least 4.5:1 on page, panel and raised surfaces in
-both themes (lowest: light success 4.6). Input borders are at least 2.9:1 in dark and 3.1:1
-in light. Text on brand fills is `#10140A` at 10.9:1. Light-theme focus rings use
-`--brand-strong`, because lime on off-white is only 1.6:1.
-
-The Monaco editor theme is built at runtime from these tokens (`--code-*` for syntax) and
-rebuilt when the theme changes.
+The neutrals are deliberately not tinted toward lime (the zagoat-design skill's default):
+that produced the green-black "hacker" look. Measured contrast on page, panel and raised in
+both themes: text tokens at least 4.8:1 (code comments 4.5:1), input borders at least 3.0:1,
+text on lime 9.6:1.
 
 ## Type
 
-- Bricolage Grotesque (500, 700): headings and the hero.
-- IBM Plex Sans (400, 500, 600): body and UI.
-- JetBrains Mono (400, 500): code only (dotted zero, distinct 1/l/I). Ligatures are off.
-- Scale, ratio 1.25 on 16px: 13 / 14 / 16 / 20 / 25 / 31 / 39 / 49.
+- Barlow Condensed (600/700): headlines, from road and trail signage. Large and tight,
+  sentence case, never all caps. The landing headline is the one 88px moment.
+- Barlow (400–600): body and UI, tabular figures.
+- Martian Mono: code only. Ligatures are off.
+- Scale: 14 / 16 / 20 / 25 / 32 / 48, plus 88 for the landing headline.
 
 ## Principles
 
-1. Lime is a signal, not a surface: primary actions, focus, links and passing results only.
-2. Facets, not pills: primary buttons have one chamfered corner (`--facet`), echoing the
-   low-poly goat.
-3. The braces carry the brand: the `{ }` from the goat's horns appears in the 3D hero only.
-4. Dense and quiet in the app; the 3D hero is the landing page's one bold element.
-5. Status is color plus a word or icon, never color alone.
+1. One bold thing: the mountain-and-trail hero. Everything else is quiet.
+2. Structure carries information: peak glyphs grade difficulty (▲▲△ Medium), trail
+   waypoints are real tasks, numbers appear only where order matters (a path's tasks).
+3. No template chrome: no dot-joined meta strings, no monospace labels, no uppercase
+   eyebrows, no uniform rounded cards with shadows, no "→".
+4. Lime marks only what you act on or passed.
 
 ## Pages
 
-- Landing: headline and calls to action on the left, the 3D hero on the right; then the real
-  sample tasks, pricing and the waitlist form.
-- Problem list: a sortable table (status, title, category, difficulty, time, best result)
-  with category, difficulty and status filters, search and a random task button.
-- Problem page: its own top bar (navigation, timer, Submits left, Run tests, Submit
-  solution, shortcuts, theme, account) over resizable panes: Description / Hints /
-  Walkthrough / Submissions on the left; file tabs and the editor over a Sample tests /
-  Results console on the right. Pane sizes are saved per browser. On phones the page shows
-  the statement only.
-- Shortcuts: Ctrl/Cmd+Enter runs, Ctrl/Cmd+Shift+Enter submits; listed in the "?" menu.
+- Landing: headline left on open sky; the 3D range on the right; two real tasks as rows with
+  code excerpts; pricing in two columns; the waitlist.
+- Tasks (`/tasks`): a grid of paths. Each tile is a path drawn as a climb (waypoints in the
+  task's difficulty color, filled when solved, toward a summit that fills when the path is
+  done), with progress, the next task and "Start / Continue this path".
+- Path (`/paths/[id]`): the tasks in order on a vertical trail, with grade, time, progress
+  and a "Continue with …" button. Opening a task from here makes the workspace's previous
+  and next arrows follow the path.
+- All tasks (`/tasks/all`): the sortable, filterable table.
+- Task workspace: the skill's wireframe (top bar, resizable panes, console), on the dusk
+  surfaces.
 
 ## 3D hero
 
-`web/src/components/hero/`. Low-poly polyhedra, a torus and two extruded braces, lit in the
-logo's colors, drifting and leaning toward the cursor. three.js through React Three Fiber
-and drei, loaded dynamically with server rendering off. The device pixel ratio is capped at
-1.5, and rendering pauses when the hero is off-screen or the tab is hidden.
+`web/src/components/hero/`. A faceted terrain (flat-shaded triangles colored rock to snow by
+height, `--rock-low`, `--rock-high`, `--snow`), fogged into the page color, with a lime
+trail of switchbacks that draws itself to the summit once on load, passing a waypoint per
+task. Afterwards it only leans slightly toward the cursor. Edges fade into the sky with a
+CSS mask. DPR is capped at 1.5; rendering pauses off-screen and in hidden tabs.
 
-`web/public/brand/hero-static-{dark,light}.png` are renders of the same scene. They show
-first, and stay for reduced motion, missing WebGL and screens under 768px. Re-render them
-after changing the scene: set the theme, load `/` in a WebGL browser, make the page
-background transparent, and screenshot the `[data-hero-mode=live]` element at 1.5x with a
-transparent background (Playwright's `omit_background` works).
+`web/public/brand/hero-static-{dark,light}.png` are renders of the finished scene, shown
+first and kept for reduced motion, no WebGL and screens under 768px. Re-render after
+changing the scene: load `/` per theme in a WebGL browser, wait for the trail, make the page
+background transparent and screenshot `[data-hero-mode=live]` at 1.5x with a transparent
+background.
 
 ## Brand files
 
-`web/public/brand/logo.png` is the owner's logo, used as-is. `logo-128.png` and
-`favicon-{16,32,180,512}.png` are plain resizes of it.
+`web/public/brand/logo.png` is the owner's logo, used as-is; `logo-128.png` and
+`favicon-{16,32,180,512}.png` are plain resizes.
