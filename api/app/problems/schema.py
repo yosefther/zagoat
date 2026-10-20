@@ -50,3 +50,12 @@ class ProblemSpec(Strict):
     files: TaskFiles = TaskFiles()
     grader: Grader = Grader()
     mock_llm: str | None = None
+
+
+class PathSpec(Strict):
+    """One entry in problems/paths.yaml: an ordered route through tasks."""
+
+    id: str = Field(pattern=SLUG, max_length=64)
+    title: str = Field(min_length=3, max_length=80)
+    summary: str = Field(min_length=10, max_length=200)
+    tasks: list[str] = Field(min_length=1)

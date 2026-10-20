@@ -46,6 +46,7 @@ class TaskSpec:
 
 
 def load_task(root: Path) -> TaskSpec:
+    root = root.resolve()
     raw = yaml.safe_load((root / "problem.yaml").read_text(encoding="utf-8"))
     files = raw.get("files", {})
     grader = raw.get("grader", {})

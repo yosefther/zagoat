@@ -1,0 +1,22 @@
+# Paths: named, ordered routes through tasks, shown as the default view of /tasks.
+# Each path lists task ids (folder names) in the order to climb them, usually easier first.
+# CI checks that every id exists. A task may appear in several paths.
+
+- id: retrieval-and-rag
+  title: Retrieval and RAG
+  summary: Chunking, retrieval quality and grounding, the pieces RAG interviews poke at.
+  tasks:
+    - rag-chunking-01
+
+- id: evaluation
+  title: Evaluation
+  summary: Measure what a model actually does, from parsing its output to per-label metrics.
+  tasks:
+    - evals-ticket-classifier-01
+
+- id: llm-app-engineer
+  title: LLM app engineer
+  summary: A mixed route through the work of shipping an LLM feature, from evals to retrieval.
+  tasks:
+    - evals-ticket-classifier-01
+    - rag-chunking-01
