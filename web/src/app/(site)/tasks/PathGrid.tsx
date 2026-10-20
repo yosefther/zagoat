@@ -38,7 +38,6 @@ function PathTile({ path }: { path: LearningPath }) {
   const next = path.tasks.find((task) => task.id === path.next_task_id);
   const done = path.solved === total;
   const action = done ? "Review this path" : path.solved > 0 ? "Continue this path" : "Start this path";
-  const actionHref = next ? `/tasks/${next.id}?path=${path.id}` : `/paths/${path.id}`;
 
   return (
     <li className="flex flex-col gap-4 bg-panel p-6">
@@ -63,7 +62,7 @@ function PathTile({ path }: { path: LearningPath }) {
             {next.title}
           </p>
         )}
-        <Link href={actionHref} className={done ? "btn-secondary self-start" : "btn-primary self-start"}>
+        <Link href={`/paths/${path.id}`} className={done ? "btn-secondary self-start" : "btn-primary self-start"}>
           {action}
         </Link>
       </div>
