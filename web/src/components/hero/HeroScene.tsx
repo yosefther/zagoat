@@ -1,7 +1,7 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 import { useResolvedTheme } from "@/lib/useResolvedTheme";
@@ -161,6 +161,26 @@ function Mountain({ palette }: { palette: Palette }) {
   );
 }
 
+// The framing was tuned for a box about 1.2 times wider than tall. Keep that horizontal
+// view at any size, so a narrow box doesn't crop the peak and a wide one doesn't show the
+// terrain's edges; the vertical view stays within these bounds.
+const HORIZONTAL_FOV = 42;
+const VERTICAL_FOV_RANGE = [30, 62] as const;
+
+function FitCamera() {
+  const get = useThree((state) => state.get);
+  const { width, height } = useThree((state) => state.size);
+  useLayoutEffect(() => {
+    const camera = get().camera;
+    if (!(camera instanceof THREE.PerspectiveCamera) || !width || !height) return;
+    const half = THREE.MathUtils.degToRad(HORIZONTAL_FOV / 2);
+    const vertical = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(half) / (width / height)));
+    camera.fov = THREE.MathUtils.clamp(vertical, ...VERTICAL_FOV_RANGE);
+    camera.updateProjectionMatrix();
+  }, [get, width, height]);
+  return null;
+}
+
 export default function HeroScene({ active }: { active: boolean }) {
   const theme = useResolvedTheme();
   // Re-read the tokens whenever the theme changes.
@@ -181,10 +201,12 @@ export default function HeroScene({ active }: { active: boolean }) {
     >
       {/* Distant ridges fade into the sky. */}
       <fog attach="fog" args={[palette.page, 6.5, 13]} />
-      <ambientLight intensity={light ? 0.75 : 0.45} color={palette.snow} />
-      <directionalLight position={[4, 6, 4]} intensity={light ? 1.5 : 1.25} color={palette.snow} />
-      {/* Low evening light from behind the range, tinted by the logo's facets. */}
-      <directionalLight position={[-5, 2.5, -6]} intensity={1.1} color={palette.soft} />
+      <ambientLight intensity={light ? 0.6 : 0.45} color={palette.snow} />
+      <directionalLight position={[4, 6, 4]} intensity={light ? 1.15 : 1.25} color={palette.snow} />
+      {/* Low evening light from behind the range, tinted by the logo's facets. In daylight
+          it stays faint, or the lit faces turn olive. */}
+      <directionalLight position={[-5, 2.5, -6]} intensity={light ? 0.35 : 1.1} color={palette.soft} />
+      <FitCamera />
       <Mountain palette={palette} />
     </Canvas>
   );

@@ -17,7 +17,7 @@
   --line: #3d4366;
   --field: #7a80a6;
   --ink: #f1f3ec; /* snow */
-  --muted: #a6abc4; /* haze */
+  --muted: #b3b8cf; /* haze */
 
   --brand: #96d927;
   --brand-strong: #b4e86a;
@@ -76,8 +76,8 @@
   --focus: #3e6c08;
   --shadow-raised: 0 12px 32px rgb(27 30 51 / 0.14);
 
-  --rock-low: #c3c9dd;
-  --rock-high: #8c93b4;
+  --rock-low: #4b5287;
+  --rock-high: #9198c4;
   --snow: #ffffff;
 
   --code-keyword: #3e6c08;
@@ -100,7 +100,7 @@
   /* Scale: 14 / 16 / 20 / 25 / 32 / 48, and 88 only for the landing headline. */
   --step--2: 0.8125rem;
   --step--1: 0.875rem;
-  --step-0: 1rem;
+  --step-0: 1.0625rem;
   --step-1: 1.25rem;
   --step-2: 1.5625rem;
   --step-3: 2rem;

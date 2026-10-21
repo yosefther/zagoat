@@ -94,10 +94,10 @@
   }
 }
 
-/* The range fades into the sky at the hero's left and bottom edges instead of ending in a wall. */
+/* The range fades into the sky at the hero's sides and bottom instead of ending in a wall. */
 @utility hero-fade {
   mask-image:
-    linear-gradient(to right, transparent, #000 22%),
+    linear-gradient(to right, transparent, #000 22%, #000 90%, transparent),
     linear-gradient(to top, transparent, #000 18%);
   mask-composite: intersect;
 }
