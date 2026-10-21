@@ -12,8 +12,8 @@ export default function Home() {
     <main>
       {/* The one bold element: the climb. Text stays on open sky, left of the range. */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto grid max-w-[90rem] grid-cols-[minmax(0,1fr)] items-end md:min-h-[min(44rem,calc(100dvh-var(--header-height)))] md:grid-cols-[minmax(0,38rem)_minmax(0,1fr)]">
-          <div className="flex flex-col gap-6 px-4 pt-12 pb-6 sm:px-6 md:self-center md:py-16 md:pl-[max(1.5rem,calc((100vw-72rem)/2))]">
+        <div className="mx-auto grid max-w-[90rem] grid-cols-[minmax(0,1fr)] items-end lg:min-h-[min(44rem,calc(100dvh-var(--header-height)))] lg:grid-cols-[minmax(0,38rem)_minmax(0,1fr)]">
+          <div className="flex flex-col gap-6 px-4 pt-12 pb-6 sm:px-6 lg:self-center lg:py-16 lg:pl-[max(1.5rem,calc((min(100vw,90rem)-72rem)/2))]">
             <h1 className="font-heading text-hero leading-[0.92] font-bold tracking-[-0.01em]">
               Practice the real tasks AI interviews give you.
             </h1>
@@ -30,7 +30,7 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="h-[18rem] sm:h-[24rem] md:h-full md:min-h-[34rem]">
+          <div className="mx-auto aspect-[1248/1056] w-full max-w-[34rem] lg:aspect-auto lg:h-full lg:min-h-[34rem] lg:max-w-none">
             <HeroVisual />
           </div>
         </div>
@@ -68,11 +68,24 @@ export default function Home() {
                     Read the task
                   </Link>
                 </div>
-                <figure className="min-w-0 self-start rounded-sm bg-raised">
+                <figure className="min-w-0 self-start overflow-hidden rounded-sm bg-raised">
                   <figcaption className="px-4 pt-3 text-sm text-muted">{task.file}</figcaption>
                   <pre className="overflow-x-auto px-4 pt-2 pb-4 font-mono text-[0.8125rem] leading-relaxed">
                     <code>{task.code}</code>
                   </pre>
+                  {/* What Submit grades, as it appears in the results panel. */}
+                  <div className="flex flex-col gap-3 border-t border-line bg-page/40 px-4 py-4 text-sm">
+                    <p className="font-medium">Submit checks</p>
+                    <ul className="flex flex-col gap-1.5">
+                      {task.checks.map((check) => (
+                        <li key={check} className="flex gap-2.5">
+                          <span aria-hidden="true" className="mt-[0.45em] size-2 shrink-0 rotate-45 bg-brand" />
+                          {check}
+                        </li>
+                      ))}
+                    </ul>
+                    {task.metric && <MetricGauge {...task.metric} />}
+                  </div>
                 </figure>
               </li>
             ))}
@@ -108,5 +121,21 @@ export default function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+/** The metric bar: where the starter code lands against the line you need to clear. */
+function MetricGauge({ label, threshold, starter }: { label: string; threshold: number; starter: number }) {
+  return (
+    <div className="flex flex-col gap-1.5 pt-1">
+      <p>
+        {label} must reach <strong className="font-semibold">{threshold.toFixed(2)}</strong>
+        <span className="text-muted">. The starter code gets about {starter.toFixed(2)}.</span>
+      </p>
+      <div className="relative h-2 rounded-full bg-line" aria-hidden="true">
+        <div className="absolute inset-y-0 left-0 rounded-full bg-danger" style={{ width: `${starter * 100}%` }} />
+        <div className="absolute -inset-y-1 w-0.5 bg-ink" style={{ left: `${threshold * 100}%` }} />
+      </div>
+    </div>
   );
 }
