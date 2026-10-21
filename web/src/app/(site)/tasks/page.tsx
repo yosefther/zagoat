@@ -18,8 +18,8 @@ export default function TasksPage() {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl">Tasks</h1>
         <p className="max-w-[60ch] text-muted">
-          Pick a path. Each one climbs from easier tasks to harder ones, and your progress
-          shows on the trail.
+          A path is a short run of tasks on one theme, easier ones first. Start at the
+          beginning, or open any task directly.
         </p>
       </div>
       <TasksNav current="paths" />
