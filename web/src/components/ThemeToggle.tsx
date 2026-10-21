@@ -1,19 +1,10 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-
 import { DEFAULT_THEME, THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
-const listeners = new Set<() => void>();
-
-function readTheme(): Theme {
-  const current = document.documentElement.getAttribute("data-theme");
-  return current === "light" || current === "dark" ? current : DEFAULT_THEME;
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+function currentTheme(): Theme {
+  const value = document.documentElement.getAttribute("data-theme");
+  return value === "light" || value === "dark" ? value : DEFAULT_THEME;
 }
 
 function setTheme(theme: Theme) {
@@ -23,22 +14,28 @@ function setTheme(theme: Theme) {
     // Storage can be blocked; the theme still applies to this page view.
   }
   document.documentElement.setAttribute("data-theme", theme);
-  listeners.forEach((listener) => listener());
 }
 
-/** Dark by default (section 12); one button switches to light and back. */
+/**
+ * Dark by default; one button switches to light and back. Both icons and labels are always
+ * rendered and CSS shows the right pair, so the server HTML matches whatever theme the
+ * visitor saved (no hydration mismatch).
+ */
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, readTheme, () => DEFAULT_THEME);
-  const next = theme === "dark" ? "light" : "dark";
   return (
     <button
       type="button"
-      onClick={() => setTheme(next)}
+      onClick={() => setTheme(currentTheme() === "dark" ? "light" : "dark")}
       className="btn-quiet px-2"
-      aria-label={`Switch to ${next} theme`}
-      title={`Switch to ${next} theme`}
     >
-      {theme === "dark" ? <SunIcon /> : <MoonIcon />}
+      <span className="light:hidden">
+        <SunIcon />
+        <span className="sr-only">Switch to light theme</span>
+      </span>
+      <span className="hidden light:inline">
+        <MoonIcon />
+        <span className="sr-only">Switch to dark theme</span>
+      </span>
     </button>
   );
 }
