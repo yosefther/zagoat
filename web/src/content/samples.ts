@@ -12,6 +12,10 @@ export type SampleTask = {
   brief: string;
   file: string;
   code: string;
+  /** Plain-words names of some hidden tests; the names are shown in results anyway. */
+  checks: string[];
+  /** The metric Submit measures, and roughly where the starter code lands. */
+  metric?: { label: string; threshold: number; starter: number };
 };
 
 export const SAMPLE_TASKS: SampleTask[] = [
@@ -30,6 +34,13 @@ export const SAMPLE_TASKS: SampleTask[] = [
     for start in range(0, len(words) - max_words, max_words):
         window = words[start : start + max_words]
         ...  # headings land in the wrong chunk`,
+    checks: [
+      "Every handbook section is indexed",
+      "Chunks start with their heading",
+      "No text is dropped or mixed between sections",
+      "The prompt carries the retrieved evidence",
+    ],
+    metric: { label: "recall@5", threshold: 0.8, starter: 0.4 },
   },
   {
     id: "evals-ticket-classifier-01",
@@ -44,5 +55,11 @@ export const SAMPLE_TASKS: SampleTask[] = [
     code: `def parse_label(reply: str) -> str | None:
     """'Label: Bug.' -> 'bug'; hedged answers -> None."""
     raise NotImplementedError`,
+    checks: [
+      "Hedged or malformed replies parse to None",
+      "Unparseable replies count as wrong",
+      "Macro F1 averages every label, even unseen ones",
+      "The model is asked once per ticket",
+    ],
   },
 ];
