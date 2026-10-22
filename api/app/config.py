@@ -30,6 +30,10 @@ REQUIRED_IN_PRODUCTION = (
     "worker_allowed_ips",
 )
 
+# Secrets production checks for strength, so a value copied from .env.example is refused.
+PRODUCTION_SECRETS = ("secret_key", "worker_secret")
+MIN_SECRET_LENGTH = 32
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", frozen=True)
@@ -130,6 +134,17 @@ class Settings(BaseSettings):
             if missing:
                 names = ", ".join(name.upper() for name in missing)
                 raise ValueError(f"Production requires these settings to be set: {names}")
+            weak = [
+                name.upper()
+                for name in PRODUCTION_SECRETS
+                if len(getattr(self, name)) < MIN_SECRET_LENGTH
+                or getattr(self, name).startswith("dev-only")
+            ]
+            if weak:
+                raise ValueError(
+                    f"Production needs random secrets of at least {MIN_SECRET_LENGTH} "
+                    f"characters: {', '.join(weak)}"
+                )
             if not self.cookie_secure:
                 raise ValueError("Production requires COOKIE_SECURE=true")
             if self.dev_login_enabled:

@@ -31,7 +31,8 @@ def test_docs_are_hidden_in_production(settings: Settings) -> None:
         web_origin="https://zagoat.io",
         api_origin="https://api.zagoat.io",
         cookie_secure=True,
-        worker_secret="a-long-worker-secret",
+        secret_key="k" * 40,
+        worker_secret="w" * 40,
         worker_allowed_ips=("198.51.100.7",),
         payment_provider=None,
     )

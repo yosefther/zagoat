@@ -11,9 +11,9 @@ PRODUCTION: dict[str, Any] = {
     "redis_url": "redis://cache:6379/0",
     "web_origin": "https://zagoat.io",
     "api_origin": "https://api.zagoat.io",
-    "secret_key": "a-long-random-secret",
+    "secret_key": "k" * 40,
     "cookie_secure": True,
-    "worker_secret": "a-long-worker-secret",
+    "worker_secret": "w" * 40,
     "worker_allowed_ips": ("198.51.100.7",),
     "payment_provider": None,
 }
@@ -38,6 +38,19 @@ def test_production_refuses_to_start_on_defaults() -> None:
 
 def test_production_accepts_explicit_values() -> None:
     assert production().is_production
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"secret_key": "dev-only-secret-change-me"},
+        {"worker_secret": "dev-only-worker-secret"},
+        {"secret_key": "short-secret"},
+    ],
+)
+def test_production_refuses_example_or_short_secrets(overrides: dict[str, str]) -> None:
+    with pytest.raises(ValidationError, match="random secrets"):
+        production(**overrides)
 
 
 def test_production_requires_secure_cookies() -> None:

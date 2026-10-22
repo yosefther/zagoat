@@ -2,10 +2,14 @@
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Self
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+# Production refuses a shorter WORKER_SECRET, or the example value from .env.example.
+MIN_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -56,6 +60,17 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @model_validator(mode="after")
+    def _require_a_real_secret_in_production(self) -> Self:
+        secret = self.worker_secret
+        weak = len(secret) < MIN_SECRET_LENGTH or secret.startswith("dev-only")
+        if self.is_production and weak:
+            raise ValueError(
+                f"Production needs a random WORKER_SECRET of at least {MIN_SECRET_LENGTH} "
+                "characters"
+            )
+        return self
 
 
 @lru_cache
