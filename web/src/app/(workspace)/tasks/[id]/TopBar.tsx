@@ -57,12 +57,12 @@ export function TopBar({ title, neighbors }: Props) {
             )}
           </label>
           {usage && submitsLeft !== null && (
-            <span className="text-muted" title={`Resets at ${formatLocalTime(usage.submits_reset_at)}`}>
-              {submitsLeft} of {usage.submits_limit} Submits left
+            <span className="text-muted">
+              {submitsLeft} of {usage.submits_limit} Submits left, resets at{" "}
+              {formatLocalTime(usage.submits_reset_at)}
               {submitsLeft === 0 && problem?.plan === "free" && (
                 <>
-                  {" · "}
-                  <Link href="/pricing">Upgrade for more</Link>
+                  . <Link href="/pricing">Upgrade for more</Link>
                 </>
               )}
             </span>

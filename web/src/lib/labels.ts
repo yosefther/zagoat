@@ -11,11 +11,6 @@ export const DIFFICULTY_LABELS = {
   hard: "Hard",
 } as const;
 
-export const ACCESS_LABELS = {
-  free: "Free",
-  paid: "Lifetime and Pro",
-} as const;
-
 export const PROGRESS_LABELS = {
   not_started: "Not started",
   in_progress: "In progress",

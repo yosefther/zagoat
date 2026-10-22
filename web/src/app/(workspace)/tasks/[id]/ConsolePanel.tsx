@@ -20,8 +20,8 @@ export function ConsolePanel() {
       <div className="border-b border-line">
         <Tabs
           tabs={[
-            { id: "sample", label: busy === "run" ? "Sample tests · running" : "Sample tests" },
-            { id: "results", label: busy === "submit" ? "Results · grading" : "Results" },
+            { id: "sample", label: busy === "run" ? "Sample tests (running)" : "Sample tests" },
+            { id: "results", label: busy === "submit" ? "Results (grading)" : "Results" },
           ]}
           active={consoleTab}
           onSelect={(id) => setConsoleTab(id as "sample" | "results")}

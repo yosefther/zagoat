@@ -120,15 +120,14 @@ export function AccountPanel() {
             {PLAN_LABELS[user.plan.name]}
             {user.plan.access_ends_at && (
               <span className="text-muted">
-                {" "}
-                · access until {formatLocalDateTime(user.plan.access_ends_at)}
+                , with access until {formatLocalDateTime(user.plan.access_ends_at)}
               </span>
             )}
           </p>
           <p className="text-sm text-muted">
             {user.usage.submits_used} of {user.usage.submits_limit} Submits used today (resets at{" "}
-            {formatLocalTime(user.usage.submits_reset_at)}) · {user.usage.runs_used} of{" "}
-            {user.usage.runs_limit} test runs this hour
+            {formatLocalTime(user.usage.submits_reset_at)}). {user.usage.runs_used} of{" "}
+            {user.usage.runs_limit} test runs used this hour.
           </p>
           {user.plan.tier === "free" ? (
             <Link href="/pricing" className="self-start text-sm">

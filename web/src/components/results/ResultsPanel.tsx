@@ -59,8 +59,8 @@ function Verdict({ job }: { job: Job }) {
         </span>
         <span className="text-muted">
           {label}
-          {job.tests_total ? ` · ${job.tests_passed} of ${job.tests_total} tests passed` : ""}
-          {job.duration_ms ? ` · ${(job.duration_ms / 1000).toFixed(1)} s` : ""}
+          {job.tests_total ? `, ${job.tests_passed} of ${job.tests_total} tests passed` : ""}
+          {job.duration_ms ? `, in ${(job.duration_ms / 1000).toFixed(1)} s` : ""}
         </span>
       </div>
       {job.message && <p>{job.message}</p>}
