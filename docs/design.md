@@ -1,8 +1,8 @@
 # zagoat design
 
 Approved by the owner on 2026-10-21 after olive-black with lime was rejected as generic. A
-"field notebook" restyle (light graph paper, no 3D) was tried on 2026-10-22 and rejected as
-"AI-ish"; dusk was restored and refined. Rules for any UI work: [`.claude/skills/frontend-design/SKILL.md`](../.claude/skills/frontend-design/SKILL.md)
+"field notebook" restyle (light graph paper, no 3D) was tried on 2026-10-22 and
+rejected; dusk was restored and refined. Rules for any UI work: [`.claude/skills/frontend-design/SKILL.md`](../.claude/skills/frontend-design/SKILL.md)
 and [`.claude/skills/zagoat-design/SKILL.md`](../.claude/skills/zagoat-design/SKILL.md).
 Every value lives once in [`web/src/styles/tokens.css`](../web/src/styles/tokens.css).
 

@@ -36,6 +36,7 @@ sections 8 to 11 of the brief (summary below).
 | `runner/` | Worker, Docker sandbox, task image, grading harness, mock LLM and task validation ([runner/README.md](runner/README.md)) |
 | `problems/` | One folder per practice task ([problems/README.md](problems/README.md) explains how to write one) |
 | `infra/` | docker-compose for local development; server scripts later |
+| `docs/` | [The architecture and business-logic plan](docs/plan.md) and [the design system](docs/design.md) |
 
 ## Prerequisites
 
@@ -176,7 +177,14 @@ The `.env.example` files list every variable. Real `.env` files are gitignored.
 - Errors always use one shape: `{"error": {"code", "message", ...}}`. Validation errors add
   `fields`, rate limits add `retry_after_seconds` and a `Retry-After` header.
 - Per-IP rate limits use Redis fixed windows (`api/app/ratelimit.py`). In production, run
-  uvicorn with `--proxy-headers` behind the reverse proxy so the client IP is real.
+  uvicorn with `--proxy-headers` and `--forwarded-allow-ips` set to the reverse proxy only, so
+  the client IP is real and can't be spoofed with a header.
+- Production refuses to start unless `SECRET_KEY` and `WORKER_SECRET` are random values of at
+  least 32 characters (the `dev-only…` examples are rejected), in both the API and the runner.
+- The web app sends baseline security headers (`web/next.config.ts`): no framing, no MIME
+  sniffing, a strict referrer policy.
+- The worker never follows symlinks when reading a sandbox's results, since user code can write
+  to that folder.
 
 ## Monitoring and analytics
 
