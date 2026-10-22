@@ -11,13 +11,13 @@ Done: Milestones 1 (foundations), 2 (landing page and waitlist), 3 (accounts), 4
 Milestone 9 (production) is next.
 
 The web app has the landing page with a waitlist form, privacy and terms placeholders
-(marked as drafts to review before launch), a static pricing page and a 404 page. The
+(marked as drafts to review before launch), a pricing page and a 404 page. The
 design follows the `zagoat-design` skill (`.claude/skills/zagoat-design/SKILL.md`); its
 decisions, palette and contrast measurements are in [docs/design.md](docs/design.md). All
 colors, fonts and sizes are tokens in `web/src/styles/tokens.css`. Sign-in works with GitHub, Google
 or (locally only) a dev user, and the account page covers profile, the code opt-in and
 self-service deletion. Tasks sync from `problems/` into Postgres. Users browse them at
-`/tasks`, as a grid of paths (curated routes from `problems/paths.yaml`, each with its own
+`/tasks`, as path cards (curated routes from `problems/paths.yaml`, each with its own
 page at `/paths/[id]`) or as one table at `/tasks/all`; there are two original
 development tasks (one RAG, one evals). The internal name stays "problems" in the API,
 database and repo; old `/problems` links redirect. Signed-in users with

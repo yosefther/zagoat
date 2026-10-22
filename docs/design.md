@@ -1,7 +1,8 @@
 # zagoat design
 
-Second direction, approved by the owner on 2026-10-21 after the first (olive-black with lime)
-was rejected as generic. Rules for any UI work: [`.claude/skills/frontend-design/SKILL.md`](../.claude/skills/frontend-design/SKILL.md)
+Approved by the owner on 2026-10-21 after olive-black with lime was rejected as generic. A
+"field notebook" restyle (light graph paper, no 3D) was tried on 2026-10-22 and rejected as
+"AI-ish"; dusk was restored and refined. Rules for any UI work: [`.claude/skills/frontend-design/SKILL.md`](../.claude/skills/frontend-design/SKILL.md)
 and [`.claude/skills/zagoat-design/SKILL.md`](../.claude/skills/zagoat-design/SKILL.md).
 Every value lives once in [`web/src/styles/tokens.css`](../web/src/styles/tokens.css).
 
@@ -17,7 +18,7 @@ trail signage type, grades. The copy stays plain.
 | --- | --- | --- | --- |
 | `--page` (dusk) | `#1B1E33` | `#F2F4F8` | Evening sky, roughly the complement of the logo's lime |
 | `--panel` / `--raised` | `#232742` / `#2E3353` | `#FFFFFF` / `#E6E9F1` | Ridge and scree surfaces |
-| `--ink` / `--muted` | `#F1F3EC` / `#A6ABC4` | `#1B1E33` / `#555B78` | Snow and haze text |
+| `--ink` / `--muted` | `#F1F3EC` / `#B3B8CF` | `#1B1E33` / `#555B78` | Snow and haze text |
 | `--brand` | `#96D927` | `#96D927` (fills) | Logo body: actions, focus, the trail, passed results |
 | `--brand-strong` | `#B4E86A` | `#3E6C08` | Links and focus rings |
 | `--brand-soft` | `#C6EE83` | `#C6EE83` | Logo facets: highlights in the 3D hero |
@@ -35,7 +36,7 @@ text on lime 9.6:1.
   sentence case, never all caps. The landing headline is the one 88px moment.
 - Barlow (400–600): body and UI, tabular figures.
 - Martian Mono: code only. Ligatures are off.
-- Scale: 14 / 16 / 20 / 25 / 32 / 48, plus 88 for the landing headline.
+- Scale: 14 / 17 / 20 / 25 / 32 / 48, plus 88 for the landing headline. Body is 17px.
 
 ## Principles
 
@@ -48,11 +49,19 @@ text on lime 9.6:1.
 
 ## Pages
 
-- Landing: headline left on open sky; the 3D range on the right; two real tasks as rows with
-  code excerpts; pricing in two columns; the waitlist.
-- Tasks (`/tasks`): a grid of paths. Each tile is a path drawn as a climb (waypoints in the
-  task's difficulty color, filled when solved, toward a summit that fills when the path is
-  done), with progress, the next task and "Start / Continue this path".
+- Landing: headline left on open sky; the 3D range on the right; two real tasks as rows,
+  each with a starter-code excerpt and what Submit checks (plain-words test names and, for
+  metric tasks, a bar from the starter score to the threshold); pricing in two columns; the
+  waitlist.
+- Tasks (`/tasks`): paths as bordered cards, two columns from 1024px (layout requested by the
+  owner on 2026-10-22, after Hack The Box Academy's path list; layout only, nothing copied).
+  The art (`PathArt`) is an original isometric diorama per kind of path (RAG, evals,
+  training, serving, or mixed when a path spans categories), colored from the hero's rock
+  tokens. A code-window version was tried and dropped on 2026-10-22; the owner prefers the
+  dioramas. Then
+  a status tag (In progress, Completed), categories and task count, the title, a three-line
+  summary, and either a progress bar that fills with solved tasks only, plus "x of n solved,
+  y started", or the hardest grade and total time.
 - Path (`/paths/[id]`): the tasks in order on a vertical trail, with grade, time, progress
   and a "Continue with …" button. Opening a task from here makes the workspace's previous
   and next arrows follow the path.
@@ -66,7 +75,14 @@ text on lime 9.6:1.
 height, `--rock-low`, `--rock-high`, `--snow`), fogged into the page color, with a lime
 trail of switchbacks that draws itself to the summit once on load, passing a waypoint per
 task. Afterwards it only leans slightly toward the cursor. Edges fade into the sky with a
-CSS mask. DPR is capped at 1.5; rendering pauses off-screen and in hidden tabs.
+CSS mask. DPR is capped at 1.5; rendering pauses off-screen and in hidden tabs. The camera keeps a fixed
+42° horizontal view and derives the vertical one from the box (clamped to 30–62°), so the
+peak is never cropped and the terrain's edges never show; the mask fades both sides and the
+bottom. Below 1024px the hero stacks under the text in a box with the render's own
+proportions (at most 34rem wide).
+
+In light mode the rock runs from `#4B5287` to `#9198C4` with dimmer lights, so the range
+keeps its shape against the pale sky (the first, paler light rock washed out).
 
 `web/public/brand/hero-static-{dark,light}.png` are renders of the finished scene, shown
 first and kept for reduced motion, no WebGL and screens under 768px. Re-render after
