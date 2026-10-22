@@ -8,7 +8,9 @@ and tests are mounted read-only; no secrets enter the container.
 
 import json
 import logging
+import os
 import shutil
+import stat
 import subprocess
 import time
 from dataclasses import dataclass
@@ -164,10 +166,19 @@ class DockerExecutor:
             shutil.rmtree(job_dir, ignore_errors=True)
 
     def _read_results(self, path: Path) -> dict[str, object] | None:
-        if not path.is_file() or path.stat().st_size > self.settings.max_results_bytes:
-            return None
+        # /out is writable by user code, so never follow a link it planted there: a symlink
+        # to a host file would make the worker read that file.
         try:
-            data = json.loads(path.read_text())
+            fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        except OSError:
+            return None
+        with os.fdopen(fd, "rb") as file:
+            info = os.fstat(file.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_size > self.settings.max_results_bytes:
+                return None
+            raw = file.read(self.settings.max_results_bytes + 1)
+        try:
+            data = json.loads(raw.decode())
         except (ValueError, UnicodeDecodeError):
             return None
         return data if isinstance(data, dict) else None
