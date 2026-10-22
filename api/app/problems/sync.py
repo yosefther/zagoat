@@ -35,6 +35,7 @@ def _apply(row: Problem, problem: PublicProblem) -> None:
     row.reference_files = problem.reference_files
     row.sample_tests = problem.sample_tests
     row.metrics = [metric.model_dump() for metric in spec.grader.metrics]
+    row.featured = problem.featured
 
 
 def sync_problems(db: Session, problems: list[PublicProblem]) -> SyncReport:

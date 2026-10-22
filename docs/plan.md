@@ -1,6 +1,7 @@
 > Imported on 2026-10-22 from the planning doc written under the working name "Onsite",
 > which became zagoat. [CLAUDE.md](../CLAUDE.md) is the source of truth where the two differ:
-> it adds learning paths (a `paths` table and `GET /paths`), and the code has no
+> it adds learning paths (a `paths` table and `GET /paths`) and landing-page previews
+> (a `featured` block in `problem.yaml` and `GET /problems/featured`), and the code has no
 > `users.deleted_at` because account deletion removes the row outright.
 
 # Onsite — Architecture and Business Logic (MVP)

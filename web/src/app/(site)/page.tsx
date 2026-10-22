@@ -1,3 +1,4 @@
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -5,7 +6,8 @@ import { PricingPlans } from "./pricing/PricingPlans";
 import { HeroVisual } from "@/components/hero/HeroVisual";
 import { ProblemMeta } from "@/components/ProblemMeta";
 import { WaitlistForm } from "@/components/WaitlistForm";
-import { SAMPLE_TASKS } from "@/content/samples";
+import { serverRequest } from "@/lib/api";
+import type { FeaturedTask } from "@/lib/types";
 
 export default function Home() {
   return (
@@ -36,62 +38,10 @@ export default function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="samples-heading" className="bg-panel">
-        <div className="container-page flex flex-col gap-10 py-16">
-          <div className="flex max-w-[60ch] flex-col gap-3">
-            <h2 id="samples-heading" className="text-3xl">
-              Two tasks you can open today
-            </h2>
-            <p className="text-muted">
-              Each one is a small, broken piece of a real AI system, with data, starter code and
-              tests. Read any statement for free, and sign in to solve.
-            </p>
-          </div>
-          <ol className="flex flex-col">
-            {SAMPLE_TASKS.map((task) => (
-              <li
-                key={task.id}
-                className="grid grid-cols-[minmax(0,1fr)] gap-6 border-t border-line py-10 first:border-t-0 first:pt-0 last:pb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12"
-              >
-                <div className="flex flex-col gap-3">
-                  <ProblemMeta
-                    problem={{
-                      category: task.category,
-                      difficulty: task.difficulty,
-                      est_minutes: task.minutes,
-                      access: "free",
-                    }}
-                  />
-                  <h3 className="text-2xl">{task.title}</h3>
-                  <p className="max-w-[52ch] text-muted">{task.brief}</p>
-                  <Link href={`/tasks/${task.id}`} className="self-start font-medium">
-                    Read the task
-                  </Link>
-                </div>
-                <figure className="min-w-0 self-start overflow-hidden rounded-sm bg-raised">
-                  <figcaption className="px-4 pt-3 text-sm text-muted">{task.file}</figcaption>
-                  <pre className="overflow-x-auto px-4 pt-2 pb-4 font-mono text-[0.8125rem] leading-relaxed">
-                    <code>{task.code}</code>
-                  </pre>
-                  {/* What Submit grades, as it appears in the results panel. */}
-                  <div className="flex flex-col gap-3 border-t border-line bg-page/40 px-4 py-4 text-sm">
-                    <p className="font-medium">Submit checks</p>
-                    <ul className="flex flex-col gap-1.5">
-                      {task.checks.map((check) => (
-                        <li key={check} className="flex gap-2.5">
-                          <span aria-hidden="true" className="mt-[0.45em] size-2 shrink-0 rotate-45 bg-brand" />
-                          {check}
-                        </li>
-                      ))}
-                    </ul>
-                    {task.metric && <MetricGauge {...task.metric} />}
-                  </div>
-                </figure>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* Left out when the API is down or nothing is featured. */}
+      <Suspense fallback={null}>
+        <SampleTasks />
+      </Suspense>
 
       <section aria-labelledby="pricing-heading">
         <div className="container-page flex flex-col gap-8 py-16">
@@ -124,8 +74,81 @@ export default function Home() {
   );
 }
 
+/** Tasks whose problem.yaml has a `featured` block, built into the page and refreshed often. */
+async function featuredTasks(): Promise<FeaturedTask[]> {
+  "use cache";
+  cacheLife("minutes");
+  // An API outage (even during the build) leaves the section out until the next refresh.
+  return (await serverRequest<FeaturedTask[]>("/problems/featured").catch(() => null)) ?? [];
+}
+
+/** Read-only previews of the featured tasks. */
+async function SampleTasks() {
+  const tasks = await featuredTasks();
+  if (tasks.length === 0) return null;
+  return (
+    <section aria-labelledby="samples-heading" className="bg-panel">
+      <div className="container-page flex flex-col gap-10 py-16">
+        <div className="flex max-w-[60ch] flex-col gap-3">
+          <h2 id="samples-heading" className="text-3xl">
+            {tasks.length === 1 ? "A task" : "Tasks"} you can open today
+          </h2>
+          <p className="text-muted">
+            Each task is a small, broken piece of a real AI system, with data, starter code and
+            tests. Read any statement for free, and sign in to solve.
+          </p>
+        </div>
+        <ol className="flex flex-col">
+          {tasks.map((task) => (
+            <li
+              key={task.id}
+              className="grid grid-cols-[minmax(0,1fr)] gap-6 border-t border-line py-10 first:border-t-0 first:pt-0 last:pb-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-12"
+            >
+              <div className="flex flex-col gap-3">
+                <ProblemMeta problem={task} />
+                <h3 className="text-2xl">{task.title}</h3>
+                <p className="max-w-[52ch] text-muted">{task.summary}</p>
+                <Link href={`/tasks/${task.id}`} className="self-start font-medium">
+                  Read the task
+                </Link>
+              </div>
+              <figure className="min-w-0 self-start overflow-hidden rounded-sm bg-raised">
+                <figcaption className="px-4 pt-3 text-sm text-muted">{task.file}</figcaption>
+                <pre className="overflow-x-auto px-4 pt-2 pb-4 font-mono text-[0.8125rem] leading-relaxed">
+                  <code>{task.code}</code>
+                </pre>
+                {/* What Submit grades, as it appears in the results panel. */}
+                <div className="flex flex-col gap-3 border-t border-line bg-page/40 px-4 py-4 text-sm">
+                  <p className="font-medium">Submit checks</p>
+                  <ul className="flex flex-col gap-1.5">
+                    {task.checks.map((check) => (
+                      <li key={check} className="flex gap-2.5">
+                        <span aria-hidden="true" className="mt-[0.45em] size-2 shrink-0 rotate-45 bg-brand" />
+                        {check}
+                      </li>
+                    ))}
+                  </ul>
+                  {task.gauge && <MetricGauge {...task.gauge} />}
+                </div>
+              </figure>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 /** The metric bar: where the starter code lands against the line you need to clear. */
-function MetricGauge({ label, threshold, starter }: { label: string; threshold: number; starter: number }) {
+function MetricGauge({
+  label,
+  threshold,
+  starter_value: starter,
+}: {
+  label: string;
+  threshold: number;
+  starter_value: number;
+}) {
   return (
     <div className="flex flex-col gap-1.5 pt-1">
       <p>

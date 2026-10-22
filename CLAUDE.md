@@ -153,6 +153,7 @@ Plan definitions and limits live in config, not in the database.
 | GET /me | Signed in | Profile, plan, today's usage and reset time |
 | DELETE /me | Signed in | Deletes the account and its code, drafts and history |
 | GET /problems | Anyone | List with category, difficulty, access and the user's progress |
+| GET /problems/featured | Anyone | Landing-page previews from each task's `featured` block |
 | GET /problems/{id} | Anyone | Statement; starter code needs access to the problem |
 | POST /problems/{id}/hints/{n} | Users with access | Reveals the next hint and records it |
 | GET /problems/{id}/walkthrough | Lifetime and Pro | Full written walkthrough |
@@ -257,7 +258,7 @@ Users see "tasks" everywhere (decided 2026-10-22). The API, database and the `pr
 
 Paths (decided 2026-10-22): a path is a named, ordered route through tasks, defined in `problems/paths.yaml` and validated in CI. `/tasks` shows the paths as a grid; picking one opens its page, and on a task opened from a path, previous and next follow that path. Path progress comes from task progress; there is no separate "join path" step.
 
-- Landing: the 3D hero, then 2–3 real sample tasks as read-only previews, pricing, and a waitlist form (email plus consent checkbox). The privacy page must be live before the waitlist collects any email.
+- Landing: the 3D hero, then 2–3 real sample tasks as read-only previews (free tasks only, picked by the `featured` block in their `problem.yaml`, decided 2026-10-22), pricing, and a waitlist form (email plus consent checkbox). The privacy page must be live before the waitlist collects any email.
 - Privacy and terms: simple placeholder text, clearly marked for my review before launch.
 
 All UI work follows the project skill in `.claude/skills/zagoat-design/SKILL.md` (you can also run it with `/zagoat-design`), together with Anthropic's `frontend-design` skill when it's installed. The skill holds the full design rules. The essentials:

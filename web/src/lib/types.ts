@@ -36,6 +36,18 @@ export type ProblemSummary = {
   best_result: { value: number; label: string } | null;
 };
 
+/** A landing-page preview, from the task's `featured` block in problem.yaml. */
+export type FeaturedTask = Pick<
+  ProblemSummary,
+  "id" | "title" | "summary" | "category" | "difficulty" | "est_minutes" | "access"
+> & {
+  file: string;
+  code: string;
+  checks: string[];
+  /** The metric Submit measures, and roughly where the starter code lands. */
+  gauge: { label: string; threshold: number; starter_value: number } | null;
+};
+
 export type MetricSpec = {
   name: string;
   threshold: number;

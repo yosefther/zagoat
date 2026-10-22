@@ -98,6 +98,8 @@ class Problem(Base):
     sample_tests: Mapped[dict[str, str]] = mapped_column(JSONB, server_default="{}")
     # Metric names and thresholds, shown next to results. Not secret.
     metrics: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    # The landing-page preview from problem.yaml's `featured` block; null if not featured.
+    featured: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

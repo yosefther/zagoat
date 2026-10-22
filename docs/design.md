@@ -49,10 +49,11 @@ text on lime 9.6:1.
 
 ## Pages
 
-- Landing: headline left on open sky; the 3D range on the right; two real tasks as rows,
-  each with a starter-code excerpt and what Submit checks (plain-words test names and, for
-  metric tasks, a bar from the starter score to the threshold); pricing in two columns; the
-  waitlist.
+- Landing: headline left on open sky; the 3D range on the right; the featured free tasks as
+  rows (chosen and ordered by the `featured` block in each `problem.yaml`; the section is
+  left out if the API can't be reached), each with a starter-code excerpt and what Submit
+  checks (plain-words test names and, for metric tasks, a bar from the starter score to the
+  threshold); pricing in two columns; the waitlist.
 - Tasks (`/tasks`): paths as bordered cards, two columns from 1024px (layout requested by the
   owner on 2026-10-22, after Hack The Box Academy's path list; layout only, nothing copied).
   The art (`PathArt`) is an original isometric diorama per kind of path (RAG, evals,

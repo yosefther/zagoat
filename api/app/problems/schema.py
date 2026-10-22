@@ -1,6 +1,6 @@
 """The problem.yaml schema (brief, section 5). CI rejects any task that doesn't match it."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -37,6 +37,27 @@ class Grader(Strict):
     metrics: list[Metric] = []
 
 
+class Gauge(Strict):
+    """The landing page's metric bar: the threshold against where the starter code lands."""
+
+    metric: str  # a grader metric with goal at_least and a threshold between 0 and 1
+    label: str = Field(min_length=1, max_length=24)  # e.g. "recall@5"
+    starter_value: float = Field(ge=0, le=1)
+
+
+class Featured(Strict):
+    """A read-only preview of the task on the landing page. Leave it out to not feature it."""
+
+    order: int = Field(ge=1)  # lower comes first
+    file: str  # a starter file to quote
+    lines: tuple[int, int]  # first and last line of that file to show, 1-based
+    # Plain-words names of a few hidden tests; results show test names anyway.
+    checks: list[Annotated[str, Field(min_length=3, max_length=80)]] = Field(
+        min_length=1, max_length=6
+    )
+    gauge: Gauge | None = None
+
+
 class ProblemSpec(Strict):
     id: str = Field(pattern=SLUG, max_length=64)
     title: str = Field(min_length=3, max_length=120)
@@ -50,6 +71,7 @@ class ProblemSpec(Strict):
     files: TaskFiles = TaskFiles()
     grader: Grader = Grader()
     mock_llm: str | None = None
+    featured: Featured | None = None
 
 
 class PathSpec(Strict):

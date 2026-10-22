@@ -19,7 +19,9 @@ or (locally only) a dev user, and the account page covers profile, the code opt-
 self-service deletion. Tasks sync from `problems/` into Postgres. Users browse them at
 `/tasks`, as path cards (curated routes from `problems/paths.yaml`, each with its own
 page at `/paths/[id]`) or as one table at `/tasks/all`; there are two original
-development tasks (one RAG, one evals). The internal name stays "problems" in the API,
+development tasks (one RAG, one evals). The landing page's task previews come from each
+task's optional `featured` block in `problem.yaml` (served by `GET /problems/featured`), so
+the web app names no tasks itself. The internal name stays "problems" in the API,
 database and repo; old `/problems` links redirect. Signed-in users with
 access get a Monaco editor with a tab per file and debounced autosave of their draft.
 "Run tests" and "Submit solution" queue a job that the runner executes in a fresh,

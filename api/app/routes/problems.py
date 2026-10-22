@@ -84,6 +84,28 @@ class ProblemDetail(ProblemSummary):
     usage: UsageOut | None
 
 
+class GaugeOut(BaseModel):
+    label: str
+    threshold: float
+    starter_value: float
+
+
+class FeaturedTask(BaseModel):
+    """A read-only landing-page preview. Public data only: starter code, never hidden tests."""
+
+    id: str
+    title: str
+    summary: str
+    category: str
+    difficulty: str
+    est_minutes: int
+    access: Literal["free", "paid"]
+    file: str
+    code: str
+    checks: list[str]
+    gauge: GaugeOut | None
+
+
 class DraftRequest(BaseModel):
     files: dict[str, str]
 
@@ -216,6 +238,42 @@ def list_problems(db: DbSession, auth: OptionalAuth) -> list[ProblemSummary]:
     return [
         summary_of(p, progress.get(p.id)).model_copy(update={"best_result": best.get(p.id)})
         for p in ordered
+    ]
+
+
+@router.get("/featured", response_model=list[FeaturedTask])
+def list_featured(db: DbSession) -> list[FeaturedTask]:
+    """Free tasks whose problem.yaml has a `featured` block, in their chosen order.
+
+    The loader already rejects featured paid tasks; filtering here too means paid starter code
+    can't reach visitors even if a row slips through.
+    """
+    problems = db.scalars(
+        select(Problem).where(
+            Problem.published.is_(True),
+            Problem.access == "free",
+            Problem.featured.is_not(None),
+        )
+    ).all()
+    previews = sorted(
+        ((p, p.featured) for p in problems if p.featured),
+        key=lambda pair: (pair[1]["order"], pair[0].id),
+    )
+    return [
+        FeaturedTask(
+            id=p.id,
+            title=p.title,
+            summary=p.summary,
+            category=p.category,
+            difficulty=p.difficulty,
+            est_minutes=p.est_minutes,
+            access=p.access,
+            file=preview["file"],
+            code=preview["code"],
+            checks=preview["checks"],
+            gauge=preview["gauge"],
+        )
+        for p, preview in previews
     ]
 
 

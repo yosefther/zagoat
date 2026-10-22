@@ -110,3 +110,35 @@ def test_visitors_get_no_best_result(client: TestClient, db: Session) -> None:
     add_problem(db, "free-01")
 
     assert client.get("/problems").json()[0]["best_result"] is None
+
+
+FEATURED = {
+    "order": 1,
+    "file": "main.py",
+    "code": "def add(a, b):",
+    "checks": ["Adds two numbers"],
+    "gauge": None,
+}
+
+
+def test_featured_lists_featured_tasks_in_order(client: TestClient, db: Session) -> None:
+    second = add_problem(db, "free-02")
+    second.featured = {**FEATURED, "order": 2}
+    first = add_problem(db, "free-01")
+    first.featured = FEATURED
+    add_problem(db, "not-featured-01")
+    unpublished = add_problem(db, "draft-01")
+    unpublished.featured = FEATURED
+    unpublished.published = False
+    paid = add_problem(db, "paid-01", access="paid")
+    paid.featured = FEATURED
+    db.commit()
+
+    response = client.get("/problems/featured")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert [task["id"] for task in body] == ["free-01", "free-02"]
+    assert body[0]["code"] == "def add(a, b):"
+    assert body[0]["checks"] == ["Adds two numbers"]
+    assert "a + b" not in response.text  # never the reference solution

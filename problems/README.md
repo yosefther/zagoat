@@ -24,7 +24,7 @@ One folder per practice task. The folder name is the task id. Tasks must be orig
 The schema lives in `api/app/problems/schema.py`. Unknown keys are rejected.
 
 ```yaml
-id: rag-chunking-01          # must match the folder name
+id: rag-chunking-01          # must match the folder name; "featured" is reserved
 title: Fix the chunking in a RAG pipeline
 summary: One or two sentences for the problem list.
 category: rag                # rag | training | evals | serving
@@ -48,7 +48,29 @@ grader:
       threshold: 0.80
       goal: at_least         # optional; at_most for latency-style metrics
 mock_llm: fixtures/llm.jsonl # optional
+featured:                    # optional; shows the task on the landing page
+  order: 1                   # lower comes first
+  file: chunker.py           # a starter file to quote
+  lines: [28, 38]            # first and last line, at most 15 lines of 60 characters
+  checks:                    # 1-6 plain-words names of hidden tests
+    - Chunks start with their heading
+  gauge:                     # optional metric bar
+    metric: recall_at_5      # an at_least grader metric, threshold 0 to 1
+    label: recall@5
+    starter_value: 0.40      # roughly what the untouched starter scores
 ```
+
+## Landing page
+
+The landing page shows every published task with a `featured` block, in `order`. The
+code comes straight from the starter file, so it can't drift; if you edit that file, check
+the line range still shows the interesting part. The excerpt is dedented, and each line
+must then fit in 60 characters, or it gets cut off on the page. Only free tasks can be
+featured, because starter code is otherwise only for users with access. Validation also
+fails if the file or lines don't exist, a check is listed twice, or the gauge points at an
+unsuitable metric or has a starter value at or above the threshold. Like any change to the
+folder, editing the block bumps the task's version. If the API is down, the landing page
+simply leaves the section out.
 
 ## Paths
 

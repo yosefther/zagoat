@@ -6,8 +6,10 @@ runner (brief, section 5). Sample tests are public.
 
 import hashlib
 import re
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import yaml
 from pydantic import ValidationError
@@ -16,6 +18,12 @@ from app.problems.schema import PathSpec, ProblemSpec
 
 # Starter and reference files must be small text files the editor can show.
 MAX_CODE_FILE_BYTES = 200_000
+# The landing page quotes a short stretch of starter code, not a whole file. Wider lines
+# get cut off in its code box at desktop widths.
+MAX_PREVIEW_LINES = 15
+MAX_PREVIEW_WIDTH = 60
+# Ids that would collide with fixed API routes such as GET /problems/featured.
+RESERVED_IDS = {"featured"}
 CODE_FILE_SUFFIXES = {".py", ".md", ".txt", ".json", ".jsonl", ".yaml", ".yml", ".csv", ".toml"}
 
 
@@ -33,6 +41,8 @@ class PublicProblem:
     walkthrough: str | None
     reference_files: dict[str, str]
     sample_tests: dict[str, str]
+    # The landing-page preview, ready to serve: order, file, code, checks and gauge.
+    featured: dict[str, Any] | None = None
 
 
 def _read_text(path: Path) -> str:
@@ -78,6 +88,68 @@ def content_hash(root: Path) -> str:
     return digest.hexdigest()
 
 
+def featured_preview(
+    spec: ProblemSpec, starter: dict[str, str], spec_path: Path
+) -> dict[str, Any] | None:
+    """Check the `featured` block against the starter code and grader, and cut the snippet."""
+    featured = spec.featured
+    if featured is None:
+        return None
+    if spec.access != "free":
+        # Starter code needs access to the task (brief, section 7), so only free tasks qualify.
+        raise ProblemError(f"{spec_path}: only free tasks can be featured")
+    if len(set(featured.checks)) != len(featured.checks):
+        raise ProblemError(f"{spec_path}: featured.checks lists a check twice")
+    if featured.file not in starter:
+        raise ProblemError(f"{spec_path}: featured.file '{featured.file}' is not a starter file")
+    lines = starter[featured.file].splitlines()
+    first, last = featured.lines
+    if not 1 <= first <= last <= len(lines):
+        raise ProblemError(
+            f"{spec_path}: featured.lines {first}-{last} is outside {featured.file} "
+            f"(1-{len(lines)})"
+        )
+    if last - first + 1 > MAX_PREVIEW_LINES:
+        raise ProblemError(f"{spec_path}: featured.lines shows more than {MAX_PREVIEW_LINES} lines")
+    # Dedented, so a stretch from inside a function starts at the left edge.
+    code = textwrap.dedent("\n".join(lines[first - 1 : last]))
+    widest = max(len(line) for line in code.splitlines())
+    if widest > MAX_PREVIEW_WIDTH:
+        raise ProblemError(
+            f"{spec_path}: featured.lines has a line of {widest} characters once dedented; "
+            f"keep them to {MAX_PREVIEW_WIDTH}"
+        )
+    gauge = None
+    if featured.gauge:
+        metric = next((m for m in spec.grader.metrics if m.name == featured.gauge.metric), None)
+        if metric is None:
+            raise ProblemError(
+                f"{spec_path}: featured.gauge.metric '{featured.gauge.metric}' "
+                "is not a grader metric"
+            )
+        if metric.goal != "at_least" or not 0 <= metric.threshold <= 1:
+            raise ProblemError(
+                f"{spec_path}: featured.gauge needs an at_least metric with a threshold from 0 to 1"
+            )
+        if featured.gauge.starter_value >= metric.threshold:
+            raise ProblemError(
+                f"{spec_path}: featured.gauge.starter_value must be below the threshold "
+                f"({metric.threshold})"
+            )
+        gauge = {
+            "label": featured.gauge.label,
+            "threshold": metric.threshold,
+            "starter_value": featured.gauge.starter_value,
+        }
+    return {
+        "order": featured.order,
+        "file": featured.file,
+        "code": code,
+        "checks": list(featured.checks),
+        "gauge": gauge,
+    }
+
+
 def load_spec(root: Path) -> ProblemSpec:
     spec_path = root / "problem.yaml"
     if not spec_path.is_file():
@@ -87,6 +159,8 @@ def load_spec(root: Path) -> ProblemSpec:
         spec = ProblemSpec.model_validate(raw)
     except (yaml.YAMLError, ValidationError) as exc:
         raise ProblemError(f"{spec_path}: {exc}") from exc
+    if spec.id in RESERVED_IDS:
+        raise ProblemError(f"{spec_path}: id '{spec.id}' is reserved; pick another")
     if spec.id != root.name:
         raise ProblemError(f"{spec_path}: id '{spec.id}' must match the folder name '{root.name}'")
     return spec
@@ -135,6 +209,7 @@ def load_problem(root: Path) -> PublicProblem:
         walkthrough=optional_text(files.walkthrough),
         reference_files=reference,
         sample_tests=_read_code_dir(root, spec.grader.sample_tests),
+        featured=featured_preview(spec, starter, root / "problem.yaml"),
     )
 
 
