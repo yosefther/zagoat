@@ -1,5 +1,5 @@
 # Packages available to user code. Keep in step with the runner's dev group (uv.lock),
 # which task validation uses. Python 3.12 image, the same Python as task validation.
 numpy==2.5.4
-openai==3.42.1
+openai==3.46.0
 pytest==9.1.1
