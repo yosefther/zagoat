@@ -1,6 +1,6 @@
 # Runner services (mock LLM; the worker can run from it too). Build from runner/:
 #   docker build -t zagoat-runner:dev .
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.3 /uv /usr/local/bin/uv
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/opt/venv \
