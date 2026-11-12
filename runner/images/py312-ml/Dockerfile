@@ -1,7 +1,7 @@
 # Sandbox image for Python tasks. Build from the runner/ folder:
 #   docker build -f images/py312-ml/Dockerfile -t zagoat-py312-ml:dev .
 # Production pins it by digest (IMAGES in runner/.env).
-FROM python:3.12-slim
+FROM python:3.15-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
